@@ -32,6 +32,62 @@ export function ReceiptModal({
     ? `struk_${transactionId}.txt`
     : "struk_pembayaran.txt";
 
+  const handlePrint = () => {
+    let iframe = document.getElementById(
+      "receipt-print-frame",
+    ) as HTMLIFrameElement | null;
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "receipt-print-frame";
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
+      document.body.appendChild(iframe);
+    }
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Struk Pembayaran PDAM</title>
+  <style>
+    @page { size: auto; margin: 8mm; }
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+      font-size: 10pt;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+    }
+    .receipt-container {
+      max-width: 380px;
+      margin: 0 auto;
+      border: 1px dashed #666;
+      border-radius: 4px;
+      padding: 16px;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body><div class="receipt-container">${receiptText}</div></body>
+</html>`);
+      doc.close();
+      iframe.contentWindow?.focus();
+      setTimeout(() => {
+        iframe.contentWindow?.print();
+      }, 150);
+    } else {
+      window.print();
+    }
+  };
+
   return (
     <Dialog id="receipt-modal" isOpen={isOpen} onClose={onClose}>
       <DialogContent>
@@ -69,7 +125,7 @@ export function ReceiptModal({
             id="btn-print-receipt"
             variant="outline"
             size="md"
-            onClick={() => window.print()}
+            onClick={handlePrint}
             className="gap-2"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
