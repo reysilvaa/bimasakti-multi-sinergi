@@ -70,85 +70,134 @@ Contoh respon inquiry (WASDA):
 
 Tersedia dua layout sesuai contoh: Sidoarjo (rincian bulanan + denda + admin) dan Bondowoso (plus `PEMAKAIAN M3` dan `BEBAN`). Tanggal format `dd-mm-yyyy HH:mm:ss`, nominal pakai pemisah titik (`40.500`), label periode `AGS2014`. Struk dapat dilihat di modal, dicetak, dan diunduh sebagai `.txt`.
 
-## Menjalankan
+## Menjalankan Program
 
-1. **Install**: `npm install` (atau `pnpm install`).
-2. **Siapkan MySQL** (lokal atau remote), lalu buat database:
+### 1. Prasyarat
+- **Node.js**: `>= 22` (Direkomendasikan Node.js v26.x)
+- **npm**: `>= 10.x` (Bawaan resmi Node.js)
+- **Database**: MySQL 8.x / MariaDB lokal atau cloud (FreeDB, PlanetScale, dsb.)
 
-   ```sql
-   CREATE DATABASE IF NOT EXISTS bimasakti_pdam CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
+### 2. Konfigurasi Lingkungan (`.env`)
+Salin file konfigurasi contoh:
+```bash
+cp .env.example .env
+```
+Sesuaikan nilai konfigurasi di file `.env`:
+```ini
+PORT=3000
+NODE_ENV=development
 
-3. **Konfigurasi** — copy `.env.example` → `.env` dan sesuaikan:
+# Database MySQL / Cloud
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password_here
+DB_NAME=bimasakti_pdam
+DB_TEST_NAME=bimasakti_pdam_test
 
-   ```ini
-   PORT=3000
-   NODE_ENV=development
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=
-   DB_NAME=bimasakti_pdam
-   DB_TEST_NAME=bimasakti_pdam_test
-   RAJABILLER_URL=https://c-dev-partnerlink.rajabiller.com/json/index.php
-   RAJABILLER_UID=SP300203
-   RAJABILLER_PIN=311575
-   ```
+# Kredensial API Rajabiller Fastpay
+RAJABILLER_URL=https://c-dev-partnerlink.rajabiller.com/json/index.php
+RAJABILLER_UID=SP300203
+RAJABILLER_PIN=311575
+```
 
-4. **Build + migrasi schema** (`src/views/app.ts` → bundle esbuild, `src/` → `dist/`, schema Drizzle → MySQL):
+### 3. Instalasi Dependensi
+Gunakan **npm**:
+```bash
+npm install
+```
 
-   ```bash
-   npm run build          # bersihkan dist + build client & server
-   npm run db:generate    # (sekali per perubahan schema) generate SQL migrasi
-   npm run db:migrate     # terapkan migrasi ke DB_NAME (auto-create DB bila belum ada)
-   ```
+### 4. Migrasi Database
+Jalankan migrasi tabel Drizzle ORM ke database MySQL:
+```bash
+npm run db:migrate
+```
+*(Tabel `transactions` dan `__drizzle_migrations` otomatis dibuat).*
 
-5. **Jalankan**:
-   - Produksi: `npm start`
-   - Development (hot-reload): `npm run dev`
-6. Buka **http://localhost:3000**
+### 5. Menjalankan Aplikasi
 
-## Testing
+- **Mode Development (Hot-Reloading):**
+  ```bash
+  npm run dev
+  ```
+- **Mode Produksi (Build + Start):**
+  ```bash
+  npm run build
+  npm start
+  ```
+  *Keterangan Build Pipeline (`scripts/build.mjs`):*
+  - Membersihkan direktori `dist/` & `public/`.
+  - Otomatis mengeliminasi komentar kode (`decomment`).
+  - Mem-bundle client Preact TSX ke `views/js/app.js` & minify CSS.
+  - Mem-bundle server TypeScript ESM ke `dist/server.js`.
+  - Pre-kompresi multi-tier: **Zstandard (.zst)**, **Brotli (.br)**, dan **Gzip (.gz)**.
+- Akses aplikasi di browser: **http://localhost:3000**
+
+### 6. Deployment ke Vercel
+
+Aplikasi siap dideploy langsung ke Vercel:
+1. Hubungkan repository GitHub ke Vercel.
+2. Di Vercel Project Settings:
+   - **Framework Preset**: `Other` (dikelola oleh `vercel.json`)
+   - **Build & Output Settings**: Biarkan default / OFF (Build: `npm run build`, Output: `views`)
+   - **Environment Variables**: Tambahkan variabel dari `.env` (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `RAJABILLER_*`).
+3. Klik **Deploy**.
+
+## Pengujian & Kualitas Kode
 
 ```bash
+# Menjalankan seluruh test suite E2E (9 integration tests)
 npm test
+
+# Pemeriksaan linter (Biome) & TypeScript
+npm run lint
+npm run typecheck
+
+# Audit dead-code / unneeded dependencies
+npx knip
 ```
 
-Suite E2E (8 test) memakai database MySQL terisolasi `bimasakti_pdam_test` (DB_TEST_NAME, auto-create + migrasi + truncate per run — tidak menyentuh DB aplikasi) dan menguji: produk, validasi inquiry, inquiry WASDA & WABONDO (assert nilai persis sesuai spec), payment + format struk, idempotensi `ref2`, history + guard `limit`, unduh struk + 404.
-
-> Catatan: test memanggil sandbox Rajabiller langsung (sesuai spec point 5). Karena tagihan sandbox WABONDO berstatus "sudah dibayar", test payment menguji jalur `status 33` yang tetap tersimpan & menghasilkan struk, lalu idempotensi memblokir replay-nya.
-
-## Struktur Folder (MVC: model → repository → service → controller → view)
+## Struktur Folder (Dot-Notation & Clean Architecture)
 
 ```text
-├── views/                          # VIEW (frontend statis): index.html, css, js hasil bundle
-├── drizzle/                        # Migrasi SQL hasil drizzle-kit (jangan edit manual)
-├── drizzle.config.ts               # Config drizzle-kit (baca ENV DB_*)
+├── api/
+│   └── index.js                    # Vercel Serverless Function entry point
+├── views/                          # Static assets & compressed files (.zst, .br, .gz)
+├── drizzle/                        # Drizzle SQL migration files
+├── scripts/
+│   └── build.mjs                   # Esbuild bundling, comment stripper, multi-compression
 ├── src/
-│   ├── server.ts                   # Entry point Express
-│   ├── config/constants.ts         # ENV (PORT, DB_*, RAJABILLER_*) + SUPPORTED_PRODUCTS
-│   ├── models/                     # MODEL: entitas & tipe domain (murni, tanpa I/O)
-│   │   └── transaction.ts          #   TransactionRecord, InquiryData, DuplicatePaymentError
-│   ├── repository/                 # REPOSITORY: satu-satunya lapisan yang menyentuh SQL/DB
-│   │   ├── schema.ts               #   Definisi tabel Drizzle (transactions)
-│   │   ├── connection.ts           #   Pool MySQL + instance Drizzle
-│   │   └── transaction.repository.ts#  CRUD transactions (create/find/findById/findByRef2)
-│   ├── scripts/migrate.ts          # Runner migrasi (db:migrate; juga dipakai test)
-│   ├── services/                   # SERVICE: use case + business logic (validasi, idempotensi)
-│   │   ├── inquiryService.ts       #   Inquiry use case
-│   │   ├── paymentService.ts       #   Payment use case (idempotensi ref2 → rc 33)
-│   │   ├── historyService.ts       #   History use case (limit clamp 500)
-│   │   ├── rajabillerService.ts    #   Client fastpay.inq / fastpay.pay
-│   │   └── receiptService.ts       #   Generator struk Sidoarjo & Bondowoso
-│   ├── controllers/                # CONTROLLER: adapter HTTP tipis (parse → service → envelope)
-│   │   ├── inquiryController.ts
-│   │   ├── paymentController.ts
-│   │   ├── historyController.ts
-│   │   └── errorMapper.ts          #   ApiError.rc → HTTP status
-│   ├── routes/api.ts               # Router endpoint internal
-│   ├── utils/                      # apiResponse (envelope), terbilang, helpers, apiError
-│   └── views/app.ts                # VIEW logic: logika UI (dibundel esbuild → views/js/app.js)
-└── test_integration.mjs            # Suite E2E
+│   ├── server.ts                   # Express server bootstrap (26 lines)
+│   ├── config/
+│   │   └── constants.ts            # Environment constants & supported products
+│   ├── controllers/                # HTTP Controllers (dot-notation)
+│   │   ├── inquiry.controller.ts
+│   │   ├── payment.controller.ts
+│   │   ├── history.controller.ts
+│   │   └── error.mapper.ts
+│   ├── domain/                     # Domain schemas & entities
+│   ├── middleware/                 # Middlewares
+│   │   ├── error.middleware.ts     # Global error handler & RC mapper
+│   │   └── static.middleware.ts    # Multi-tier compression negotiation (zstd/br/gz)
+│   ├── repository/                 # Database access layer
+│   │   ├── connection.ts           # MySQL connection pool
+│   │   ├── schema.ts               # Drizzle table schemas
+│   │   └── transaction.repository.ts
+│   ├── routes/
+│   │   └── api.routes.ts           # API route declarations
+│   ├── services/                   # Business logic & external gateway
+│   │   ├── inquiry.service.ts
+│   │   ├── payment.service.ts      # Idempotency checks & payment flow
+│   │   ├── history.service.ts
+│   │   ├── rajabiller.service.ts   # Rajabiller JSON API client
+│   │   └── receipt.service.ts      # Plain-text receipt formatting
+│   └── views/                      # Preact TSX Frontend
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── components/             # Reusable UI components
+│       └── api/
+│           └── pdam.api.ts         # Frontend API fetcher layer
+├── test_integration.mjs            # 9 E2E Integration tests
+├── vercel.json                     # Vercel configuration
+└── package.json
 ```
-
-**Arah dependensi (satu arah):** `view → controller → service → repository → model`. Model tidak mengimpor lapisan lain; controller tidak berisi business logic; hanya repository yang menulis SQL.
