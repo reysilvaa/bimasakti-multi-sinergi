@@ -58,6 +58,7 @@ md.use({
       ) {
         href = `/${href.replace(/^\.\//, "")}`;
       }
+      href = href.replace(/^\/views\//, "/");
       return `<figure class="my-6 text-center"><img src="${href}" alt="${text || ""}" class="rounded-xl border border-black/[0.08] shadow-md max-w-full h-auto mx-auto cursor-pointer hover:opacity-95 transition-opacity bg-white p-4" onclick="window.__openImageModal&&window.__openImageModal('${href}')" />${text ? `<figcaption class="text-xs text-ink-800/50 mt-2 italic">${text}</figcaption>` : ""}</figure>`;
     },
 
