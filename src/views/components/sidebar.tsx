@@ -14,6 +14,7 @@ export function Sidebar({
   onSelectProduct,
 }: SidebarProps) {
   return (
+    <>
     <aside className="print:hidden w-60 shrink-0 hidden md:flex flex-col fixed inset-y-0 left-0 bg-white border-r border-black/[0.06] z-40">
       {/* Brand */}
       <div className="h-16 flex items-center px-4 border-b border-black/[0.05]">
@@ -174,5 +175,28 @@ export function Sidebar({
         </div>
       </div>
     </aside>
+
+    {/* Mobile bottom navigation */}
+    <nav className="print:hidden md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-black/[0.06] flex">
+      {([
+        { tab: "inquiry" as const, label: "Bayar", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-6.5 3.5V5A1.5 1.5 0 0 1 7 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg> },
+        { tab: "history" as const, label: "Riwayat", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.5"/><path d="M12 7.5V12l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+        { tab: "docs" as const, label: "API", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/><path d="M6 6h10M6 10h10M6 14h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> },
+        { tab: "readme" as const, label: "README", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
+      ]).map(({ tab, label, icon }) => (
+        <button
+          key={tab}
+          type="button"
+          onClick={() => onSelectTab(tab)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-semibold transition-colors ${
+            currentTab === tab ? "text-ink-950" : "text-ink-800/40"
+          }`}
+        >
+          {icon}
+          {label}
+        </button>
+      ))}
+    </nav>
+    </>
   );
 }

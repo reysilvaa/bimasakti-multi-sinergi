@@ -218,7 +218,7 @@ export function App() {
         <Header currentTab={currentTab} />
         <Toast alert={alert} onClose={() => setAlert(null)} />
 
-        <main className="flex-grow w-full max-w-6xl mx-auto px-6 py-6">
+        <main className="flex-grow w-full max-w-6xl mx-auto px-4 md:px-6 py-6 pb-24 md:pb-6">
           {currentTab === "inquiry" && (
             <section id="section-payment">
               <FlowStepper hasInquiry={!!inquiryData} />
