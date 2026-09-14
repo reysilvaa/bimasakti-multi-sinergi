@@ -27,42 +27,7 @@
 
 ### Diagram Sistem (Scope Tes Full Stack)
 
-```mermaid
-flowchart LR
-    Actor(["👤 Actor"])
-
-    subgraph SCOPE["SCOPE TES FULL STACK"]
-        FEI["Front End\nInquiry"]
-        FEP["Front End\nPayment"]
-        FEH["Front End\nHistory & Laporan"]
-        API["API Internal"]
-        DB[("DB Internal\nMySQL 8")]
-    end
-
-    RAJ_INQ(["API Inquiry\nRajabiller"])
-    RAJ_PAY(["API Payment\nRajabiller"])
-
-    Actor --> FEI
-    Actor --> FEP
-    Actor --> FEH
-
-    FEI -- inquiry --> API
-    API -- hasil tagihan --> FEI
-
-    FEP -- payment --> API
-    API -- struk --> FEP
-
-    API --> FEH
-
-    API -- simpan --> DB
-    DB -- riwayat --> API
-
-    API -- fastpay.inq --> RAJ_INQ
-    RAJ_INQ -- respon --> API
-
-    API -- fastpay.pay --> RAJ_PAY
-    RAJ_PAY -- respon --> API
-```
+![Diagram Sistem (Scope Tes Full Stack)](image.png)
 
 ### Alur Internal Request
 
