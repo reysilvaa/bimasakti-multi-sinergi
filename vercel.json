@@ -39,6 +39,13 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/download",
+      "destination": "https://github.com/reysilvaa/bimasakti-multi-sinergi/archive/refs/heads/main.zip",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
