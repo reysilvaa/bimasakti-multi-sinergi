@@ -393,7 +393,7 @@ export function ApiDocs() {
         </div>
       </div>
 
-      {/* Main Scalar-style Layout */}
+      {/* API Documentation Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Endpoint Navigation */}
         <div className="lg:col-span-4 space-y-4">
@@ -587,11 +587,11 @@ export function ApiDocs() {
             </div>
           </div>
 
-          {/* Interactive Request Tester (Scalar Live Playground) */}
+          {/* Interactive Request Tester */}
           <div className="bg-white rounded-2xl border border-black/[0.06] p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-[14px] font-bold text-ink-950">
-                Interactive Request Tester
+                Uji Request Endpoint
               </h4>
               <button
                 type="button"
