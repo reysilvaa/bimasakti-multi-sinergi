@@ -14,6 +14,7 @@ import { Header } from "@/views/components/header.js";
 import { HistoryTable } from "@/views/components/history.table.js";
 import { InquiryForm } from "@/views/components/inquiry.form.js";
 import { InquiryResult } from "@/views/components/inquiry.result.js";
+import { PaymentConfirmModal } from "@/views/components/payment.confirm.modal.js";
 import { ReceiptModal } from "@/views/components/receipt.modal.js";
 import { Sidebar } from "@/views/components/sidebar.js";
 import { type AlertState, Toast } from "@/views/components/toast.js";
@@ -30,6 +31,7 @@ export function App() {
   const [isLoadingInquiry, setIsLoadingInquiry] = useState(false);
   const [inquiryData, setInquiryData] = useState<InquiryData | null>(null);
   const [isPaying, setIsPaying] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const [alert, setAlert] = useState<AlertState | null>(null);
   const [receiptModal, setReceiptModal] = useState<{
@@ -124,6 +126,7 @@ export function App() {
       });
 
       showAlert("success", "Pembayaran Berhasil!", ket);
+      setIsConfirmModalOpen(false);
       setReceiptModal({
         isOpen: true,
         text: data.receiptText,
@@ -137,6 +140,7 @@ export function App() {
           ? err.message
           : "Terjadi kesalahan sistem saat pembayaran.";
       showAlert("error", "Pembayaran Gagal", msg);
+      setIsConfirmModalOpen(false);
     } finally {
       setIsPaying(false);
     }
@@ -197,7 +201,7 @@ export function App() {
                   isLoading={isLoadingInquiry}
                   isPaying={isPaying}
                   selectedProductName={selectedProductName}
-                  onProceedPayment={handlePaymentSubmit}
+                  onProceedPayment={() => setIsConfirmModalOpen(true)}
                   onCancel={() => setInquiryData(null)}
                 />
               </div>
@@ -225,6 +229,15 @@ export function App() {
           Sinergi.
         </footer>
       </div>
+
+      <PaymentConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handlePaymentSubmit}
+        isPaying={isPaying}
+        inquiry={inquiryData}
+        productName={selectedProductName}
+      />
 
       <ReceiptModal
         isOpen={receiptModal.isOpen}
