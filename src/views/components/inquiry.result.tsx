@@ -142,30 +142,31 @@ export function InquiryResult({
 
           <div className="p-6 space-y-5">
             {/* Metadata Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-mist-50/50 border border-black/[0.04]">
-              <div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 p-4 rounded-xl bg-mist-50/50 border border-black/[0.04]">
+              <div className="min-w-0">
                 <span className="text-[11px] font-semibold text-ink-800/40 uppercase tracking-wider block">
                   ID Pelanggan
                 </span>
                 <span
                   id="res-customer-id"
-                  className="text-sm font-mono font-bold text-ink-900"
+                  className="text-sm font-mono font-bold text-ink-900 truncate block"
                 >
                   {inquiry.idpel}
                 </span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="text-[11px] font-semibold text-ink-800/40 uppercase tracking-wider block">
                   No. Meter
                 </span>
                 <span
                   id="res-nomet"
-                  className="text-sm font-mono font-medium text-ink-900"
+                  className="text-sm font-mono font-medium text-ink-900 truncate block"
+                  title={inquiry.nomet || inquiry.nometer || "-"}
                 >
                   {inquiry.nomet || inquiry.nometer || "-"}
                 </span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="text-[11px] font-semibold text-ink-800/40 uppercase tracking-wider block">
                   Nama
                 </span>
@@ -176,13 +177,14 @@ export function InquiryResult({
                   {inquiry.nama || "-"}
                 </span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="text-[11px] font-semibold text-ink-800/40 uppercase tracking-wider block">
                   Alamat
                 </span>
                 <span
                   id="res-customer-address"
                   className="text-xs font-medium text-ink-800/70 truncate block"
+                  title={inquiry.alamat || "-"}
                 >
                   {inquiry.alamat || "-"}
                 </span>
