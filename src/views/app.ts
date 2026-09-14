@@ -190,7 +190,9 @@ class PdamApp {
 
       this.productSelect.innerHTML = "";
       const presetWrap = document.getElementById("preset-buttons");
+      const sidebarWrap = document.getElementById("sidebar-products");
       if (presetWrap) presetWrap.innerHTML = "";
+      if (sidebarWrap) sidebarWrap.innerHTML = "";
 
       for (const p of json.data) {
         const opt = document.createElement("option");
@@ -198,12 +200,34 @@ class PdamApp {
         opt.textContent = `${p.name} (${p.code})`;
         this.productSelect.appendChild(opt);
 
+        // Sidebar product rows
+        if (sidebarWrap) {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className =
+            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-black/[0.04] transition-colors text-left";
+          row.innerHTML = `
+            <span class="w-7 h-7 rounded-lg bg-accent-50 text-accent-600 flex items-center justify-center text-[10px] font-bold shrink-0">${p.code.slice(0, 2)}</span>
+            <span class="min-w-0">
+              <span class="block text-[12px] font-semibold text-ink-900 truncate">${p.name}</span>
+              <span class="block text-[10px] font-mono text-ink-800/45">${p.defaultIdpel}</span>
+            </span>`;
+          row.addEventListener("click", () => {
+            this.switchTab("inquiry");
+            this.productSelect.value = p.code;
+            this.customerIdInput.value = p.defaultIdpel;
+            this.customerIdInput.focus();
+          });
+          sidebarWrap.appendChild(row);
+        }
+
+        // Quick-fill chips inside the form card
         if (presetWrap) {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className =
-            "px-4 py-2 rounded-full text-[13px] font-medium bg-white text-ink-900 border border-black/[0.08] hover:border-black/[0.16] hover:shadow-sm transition-all";
-          btn.textContent = `${p.name} · ${p.defaultIdpel}`;
+            "px-3 py-1.5 rounded-lg text-[12px] font-medium bg-mist-50 text-ink-900 border border-black/[0.07] hover:border-black/[0.16] transition-all";
+          btn.textContent = `${p.code} · ${p.defaultIdpel}`;
           btn.addEventListener("click", () => {
             this.productSelect.value = p.code;
             this.customerIdInput.value = p.defaultIdpel;
@@ -220,13 +244,23 @@ class PdamApp {
     this.sectionPayment.classList.toggle("hidden", !isInquiry);
     this.sectionHistory.classList.toggle("hidden", isInquiry);
 
-    const activeClass =
-      "px-4 h-8 rounded-full text-[13px] font-medium transition-all bg-white shadow-sm text-ink-900 flex items-center gap-1.5";
-    const inactiveClass =
-      "px-4 h-8 rounded-full text-[13px] font-medium transition-all text-ink-800/60 hover:text-ink-900 flex items-center gap-1.5";
+    // Sidebar active state
+    const activeCls =
+      "nav-item w-full flex items-center gap-2.5 px-3 h-10 rounded-xl text-[13px] font-semibold transition-all bg-ink-950 text-white";
+    const inactiveCls =
+      "nav-item w-full flex items-center gap-2.5 px-3 h-10 rounded-xl text-[13px] font-semibold transition-all text-ink-800/60 hover:text-ink-900 hover:bg-black/[0.04]";
+    this.navInquiryBtn.className = isInquiry ? activeCls : inactiveCls;
+    this.navHistoryBtn.className = isInquiry ? inactiveCls : activeCls;
 
-    this.navInquiryBtn.className = isInquiry ? activeClass : inactiveClass;
-    this.navHistoryBtn.className = isInquiry ? inactiveClass : activeClass;
+    // Page header
+    const title = document.getElementById("page-title");
+    const subtitle = document.getElementById("page-subtitle");
+    if (title)
+      title.textContent = isInquiry ? "Bayar Tagihan" : "Riwayat Transaksi";
+    if (subtitle)
+      subtitle.textContent = isInquiry
+        ? "Inquiry & pembayaran tagihan PDAM"
+        : "Monitor seluruh transaksi tersimpan";
   }
 
   private showAlert(
@@ -541,6 +575,22 @@ class PdamApp {
   private renderTransactionTable(records: TransactionRecord[]): void {
     this.historyCountBadge.textContent = records.length.toString();
     this.historyTbody.innerHTML = "";
+
+    // Stat cards
+    const statTotal = document.getElementById("stat-total-count");
+    const statSuccess = document.getElementById("stat-success-count");
+    const statValue = document.getElementById("stat-total-value");
+    if (statTotal) statTotal.textContent = records.length.toString();
+    if (statSuccess)
+      statSuccess.textContent = records
+        .filter((t) => t.status === "00")
+        .length.toString();
+    if (statValue) {
+      const sum = records
+        .filter((t) => t.status === "00")
+        .reduce((acc, t) => acc + t.totalAmount, 0);
+      statValue.textContent = formatRupiah(sum);
+    }
 
     if (records.length === 0) {
       this.historyEmptyRow.classList.remove("hidden");
