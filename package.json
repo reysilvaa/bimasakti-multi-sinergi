@@ -1,0 +1,28 @@
+{
+  "name": "bimasakti-multi-sinergi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build:server": "tsc -p tsconfig.json",
+    "build:client": "esbuild src/frontend/app.ts --bundle --outfile=public/js/app.js --format=iife --target=es2020",
+    "build": "npm run build:client && npm run build:server",
+    "start": "node dist/server.js",
+    "dev": "npm run build:client && tsx watch src/server.ts",
+    "test": "npm run build && node test_integration.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.5.1",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,69 @@
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.receipt-paper {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  background-color: #ffffff;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+
+.receipt-paper::before,
+.receipt-paper::after {
+  content: '';
+  display: block;
+  height: 6px;
+  background-size: 12px 6px;
+  background-repeat: repeat-x;
+}
+
+.receipt-paper::before {
+  margin-top: -5px;
+  margin-bottom: 8px;
+  background-image: radial-gradient(circle at 6px 0px, transparent 4px, #ffffff 4px);
+}
+
+.receipt-paper::after {
+  margin-top: 8px;
+  margin-bottom: -5px;
+  background-image: radial-gradient(circle at 6px 6px, transparent 4px, #ffffff 4px);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-modal,
+  #receipt-modal * {
+    visibility: visible;
+  }
+  #receipt-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    background: none;
+    padding: 0;
+    margin: 0;
+  }
+  .receipt-paper {
+    box-shadow: none;
+    border: none;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #000;
+  }
+  #btn-close-receipt-modal,
+  #btn-print-receipt,
+  #btn-download-receipt,
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+}

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Pembayaran PDAM - Bimasakti Multi Sinergi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-inner">
+          <i class="fa-solid fa-faucet-drip"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">PDAM Pay Gateway</h1>
+          <p class="text-xs text-blue-200">PT Bimasakti Multi Sinergi &bull; Rajabiller Link</p>
+        </div>
+      </div>
+
+      <nav class="flex space-x-1 bg-blue-950/60 p-1 rounded-lg">
+        <button id="nav-inquiry-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-600 text-white shadow-sm flex items-center gap-2">
+          <i class="fa-solid fa-receipt"></i>
+          <span>Bayar Tagihan</span>
+        </button>
+        <button id="nav-history-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-blue-200 hover:text-white hover:bg-blue-800/50 flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Riwayat Transaksi</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl border flex items-start gap-3 transition-all duration-300">
+      <div id="alert-icon" class="text-lg mt-0.5"></div>
+      <div class="flex-1">
+        <h4 id="alert-title" class="text-sm font-semibold"></h4>
+        <p id="alert-desc" class="text-sm mt-0.5"></p>
+      </div>
+      <button id="alert-close-btn" class="text-slate-400 hover:text-slate-600" title="Tutup pemberitahuan" aria-label="Tutup pemberitahuan">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <section id="section-payment" class="space-y-6">
+      <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/30 text-blue-100 mb-3 backdrop-blur-sm border border-blue-400/20">
+            <i class="fa-solid fa-bolt text-yellow-300"></i> Fastpay API Live Integration
+          </span>
+          <h2 class="text-2xl font-bold">Pembayaran Tagihan Air PDAM</h2>
+          <p class="text-blue-100 text-sm mt-1 leading-relaxed">
+            Lakukan pengecekan (Inquiry) tagihan PDAM secara real-time, lalu selesaikan pembayaran dengan konfirmasi aman.
+          </p>
+        </div>
+        <div class="absolute -right-8 -bottom-10 opacity-10 text-9xl pointer-events-none">
+          <i class="fa-solid fa-water"></i>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-slate-600">
+          <i class="fa-solid fa-vial-circle-check text-blue-600"></i>
+          <span class="font-medium">Test IDPEL Cepat (Skill Test):</span>
+        </div>
+        <div class="flex flex-wrap gap-2" id="preset-buttons">
+          <button type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5">
+            <i class="fa-solid fa-city text-blue-500"></i>
+            <span>Memuat produk...</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-5">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-5">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <h3 class="text-base font-bold text-slate-800">Formulir Inquiry</h3>
+            </div>
+
+            <form id="form-inquiry" class="space-y-4">
+              <div>
+                <label for="product-select" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Pilih Wilayah PDAM <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <select id="product-select" name="productCode" required class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all appearance-none">
+                    <option value="WASDA">PDAM SIDOARJO (WASDA)</option>
+                    <option value="WABONDO">PDAM BONDOWOSO (WABONDO)</option>
+                  </select>
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                  </div>
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label for="customer-id-input" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Nomor ID Pelanggan (IDPEL) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <input type="text" id="customer-id-input" name="customerId" required placeholder="Contoh: 01002676" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all tracking-wide" />
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-id-card"></i>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Masukkan ID Pelanggan PDAM yang terdaftar.</p>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" id="btn-submit-inquiry" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Cek Tagihan (Inquiry)</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          
+          <div id="inquiry-empty-state" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[360px]">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mb-4">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-700">Belum Ada Tagihan yang Diperiksa</h4>
+            <p class="text-sm text-slate-500 max-w-sm mt-1.5">
+              Pilih wilayah PDAM dan masukkan nomor ID Pelanggan di sebelah kiri, kemudian klik tombol <strong>"Cek Tagihan"</strong>.
+            </p>
+          </div>
+
+          <div id="inquiry-loading-state" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[360px]">
+            <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <h4 class="text-base font-bold text-slate-800">Menghubungi Server Rajabiller...</h4>
+            <p class="text-sm text-slate-500 mt-1">Mengambil rincian tagihan secara real-time.</p>
+          </div>
+
+          <div id="inquiry-result-card" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                  <span id="res-pdam-badge" class="text-xs uppercase tracking-wider font-semibold text-blue-300"></span>
+                  <h3 class="text-base font-bold text-white">Rincian Tagihan Ditemukan</h3>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Status: Siap Bayar
+              </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-sm">
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">ID Pelanggan</span>
+                  <p id="res-customer-id" class="font-semibold text-slate-800"></p>
+                </div>
+                <div>
+                  <span class="text-xs text-slate-500 font-medium">Nama Pelanggan</span>
+                  <p id="res-customer-name" class="font-semibold text-slate-800"></p>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <span class="text-xs text-slate-500 font-medium">Jumlah Bulan</span>
+                  <p id="res-bill-count" class="font-semibold text-slate-800"></p>
+                </div>
+                <div class="col-span-2 sm:col-span-3">
+                  <span class="text-xs text-slate-500 font-medium">Alamat</span>
+                  <p id="res-customer-address" class="font-semibold text-slate-800"></p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                  <i class="fa-solid fa-list-check text-blue-600"></i>
+                  <span>Rincian Tagihan per Periode</span>
+                </h4>
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                      <tr>
+                        <th class="py-2.5 px-3">Periode</th>
+                        <th id="th-meter" class="py-2.5 px-3">Pemakaian</th>
+                        <th class="py-2.5 px-3 text-right">Air</th>
+                        <th class="py-2.5 px-3 text-right">Denda</th>
+                        <th id="th-misc" class="py-2.5 px-3 text-right">Non-Air</th>
+                      </tr>
+                    </thead>
+                    <tbody id="res-bills-tbody" class="divide-y divide-slate-200 font-medium text-slate-700">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-100 space-y-2 text-sm">
+                <div class="flex justify-between text-slate-600">
+                  <span>Tagihan Pokok:</span>
+                  <span id="res-nominal" class="font-semibold text-slate-800"></span>
+                </div>
+                <div id="row-denda-total" class="flex justify-between text-slate-600">
+                  <span>Total Denda:</span>
+                  <span id="res-penalty-total" class="font-semibold text-slate-800"></span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Total Non-Air:</span>
+                  <span id="res-misc-total" class="font-semibold text-slate-800"></span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Biaya Admin Loket:</span>
+                  <span id="res-admin-fee" class="font-semibold text-slate-800"></span>
+                </div>
+                <div class="pt-2 border-t border-blue-200/80 flex justify-between items-baseline">
+                  <div>
+                    <span class="text-base font-bold text-slate-900">Total Pembayaran:</span>
+                    <p id="res-terbilang" class="text-xs text-blue-800 font-medium italic mt-0.5"></p>
+                  </div>
+                  <span id="res-total-amount" class="text-2xl font-black text-blue-700"></span>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button type="button" id="btn-cancel-inquiry" class="sm:w-1/3 py-2.5 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-sm transition-colors text-center">
+                  Batal
+                </button>
+                <button type="button" id="btn-proceed-payment" class="sm:w-2/3 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-credit-card"></i>
+                  <span>Konfirmasi & Bayar Sekarang</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="section-history" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">Riwayat Transaksi</h2>
+          <p class="text-sm text-slate-500 mt-0.5">Daftar seluruh pembayaran PDAM yang tersimpan di Database SQLite Internal.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-refresh-history" class="px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-rotate"></i>
+            <span>Segarkan Data</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="history-search-input" placeholder="Cari IDPEL, Nama, atau No. Resi..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+          </div>
+          <div class="text-xs font-medium text-slate-500">
+            Total Transaksi: <span id="history-count-badge" class="font-bold text-slate-800">0</span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Waktu</th>
+                <th class="py-3 px-4">No. Resi</th>
+                <th class="py-3 px-4">PDAM</th>
+                <th class="py-3 px-4">IDPEL</th>
+                <th class="py-3 px-4">Nama Pelanggan</th>
+                <th class="py-3 px-4 text-right">Total Bayar</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody" class="divide-y divide-slate-200">
+            </tbody>
+          </table>
+        </div>
+
+        <div id="history-empty-row" class="hidden p-12 text-center">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xl mx-auto mb-3">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <h5 class="text-sm font-bold text-slate-700">Belum Ada Riwayat Transaksi</h5>
+          <p class="text-xs text-slate-500 mt-1">Lakukan pembayaran tagihan pertama Anda untuk melihat riwayat di sini.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="receipt-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 transition-all transform animate-in fade-in zoom-in duration-200 my-8">
+      
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-receipt text-blue-400"></i>
+          <h3 class="text-sm font-bold tracking-tight">Struk Bukti Pembayaran Sah</h3>
+        </div>
+        <button type="button" id="btn-close-receipt-modal" class="text-slate-400 hover:text-white transition-colors" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 bg-slate-100">
+        <div class="receipt-paper bg-white p-5 rounded-lg shadow-sm border border-slate-300 font-mono text-xs text-slate-900 leading-relaxed overflow-x-auto whitespace-pre select-all" id="modal-receipt-content">
+        </div>
+      </div>
+
+      <div class="bg-white px-5 py-4 border-t border-slate-200 flex flex-wrap gap-2 justify-end">
+        <button type="button" id="btn-print-receipt" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i>
+          <span>Cetak Struk</span>
+        </button>
+        <a id="btn-download-receipt" href="#" download="" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm shadow-blue-500/20">
+          <i class="fa-solid fa-download"></i>
+          <span>Unduh TXT</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <p>&copy; 2026 PT Bimasakti Multi Sinergi &bull; Technical Skill Test PDAM Gateway</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
