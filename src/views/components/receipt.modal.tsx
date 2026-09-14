@@ -36,10 +36,7 @@ export function ReceiptModal({
     <Dialog id="receipt-modal" isOpen={isOpen} onClose={onClose}>
       <DialogContent>
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <DialogTitle>Bukti Pembayaran (Struk)</DialogTitle>
-          </div>
+          <DialogTitle>Bukti Pembayaran (Struk)</DialogTitle>
           <button
             type="button"
             id="btn-close-receipt-modal"
