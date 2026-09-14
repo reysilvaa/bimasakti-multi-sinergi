@@ -28,6 +28,7 @@ class PdamApp {
   private alertTitle!: HTMLElement;
   private alertDesc!: HTMLElement;
   private alertCloseBtn!: HTMLButtonElement;
+  private alertTimeoutId: number | null = null;
 
   private navInquiryBtn!: HTMLButtonElement;
   private navHistoryBtn!: HTMLButtonElement;
@@ -200,7 +201,6 @@ class PdamApp {
         opt.textContent = `${p.name} (${p.code})`;
         this.productSelect.appendChild(opt);
 
-        // Sidebar product rows
         if (sidebarWrap) {
           const row = document.createElement("button");
           row.type = "button";
@@ -221,7 +221,6 @@ class PdamApp {
           sidebarWrap.appendChild(row);
         }
 
-        // Quick-fill chips inside the form card
         if (presetWrap) {
           const btn = document.createElement("button");
           btn.type = "button";
@@ -244,7 +243,6 @@ class PdamApp {
     this.sectionPayment.classList.toggle("hidden", !isInquiry);
     this.sectionHistory.classList.toggle("hidden", isInquiry);
 
-    // Sidebar active state
     const activeCls =
       "nav-item w-full flex items-center gap-2.5 px-3 h-10 rounded-xl text-[13px] font-semibold transition-all bg-ink-950 text-white";
     const inactiveCls =
@@ -252,7 +250,6 @@ class PdamApp {
     this.navInquiryBtn.className = isInquiry ? activeCls : inactiveCls;
     this.navHistoryBtn.className = isInquiry ? inactiveCls : activeCls;
 
-    // Page header
     const title = document.getElementById("page-title");
     const subtitle = document.getElementById("page-subtitle");
     if (title)
@@ -268,31 +265,45 @@ class PdamApp {
     title: string,
     message: string,
   ): void {
+    if (this.alertTimeoutId) {
+      clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
+
     this.alertBanner.classList.remove(
       "hidden",
       "bg-emerald-50",
       "border-emerald-200",
-      "text-emerald-900",
+      "text-emerald-950",
       "bg-red-50",
       "border-red-200",
+      "text-red-950",
+      "bg-sky-50",
+      "border-sky-200",
+      "text-sky-950",
+      "bg-emerald-50/95",
+      "border-emerald-200/80",
+      "text-emerald-900",
+      "bg-red-50/95",
+      "border-red-200/80",
       "text-red-900",
-      "bg-blue-50",
-      "border-blue-200",
-      "text-blue-900",
+      "bg-accent-50/95",
+      "border-accent-100",
+      "text-ink-900",
     );
 
     const config = {
       success: {
-        cls: ["bg-emerald-50/95", "border-emerald-200/80", "text-emerald-900"],
+        cls: ["bg-emerald-50", "border-emerald-200", "text-emerald-950"],
         icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#10b981"/><path d="M6 10.2l2.6 2.6L14 7.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       },
       error: {
-        cls: ["bg-red-50/95", "border-red-200/80", "text-red-900"],
+        cls: ["bg-red-50", "border-red-200", "text-red-950"],
         icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#ef4444"/><path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
       },
       info: {
-        cls: ["bg-accent-50/95", "border-accent-100", "text-ink-900"],
-        icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#0071e3"/><path d="M10 9v5M10 6.2v.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+        cls: ["bg-sky-50", "border-sky-200", "text-sky-950"],
+        icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#0284c7"/><path d="M10 9v5M10 6.2v.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
       },
     }[type];
 
@@ -300,10 +311,17 @@ class PdamApp {
     this.alertIcon.innerHTML = config.icon;
     this.alertTitle.textContent = title;
     this.alertDesc.textContent = message;
-    this.alertBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    this.alertTimeoutId = window.setTimeout(() => {
+      this.hideAlert();
+    }, 4500);
   }
 
   private hideAlert(): void {
+    if (this.alertTimeoutId) {
+      clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
     this.alertBanner.classList.add("hidden");
   }
 
@@ -576,7 +594,6 @@ class PdamApp {
     this.historyCountBadge.textContent = records.length.toString();
     this.historyTbody.innerHTML = "";
 
-    // Stat cards
     const statTotal = document.getElementById("stat-total-count");
     const statSuccess = document.getElementById("stat-success-count");
     const statValue = document.getElementById("stat-total-value");

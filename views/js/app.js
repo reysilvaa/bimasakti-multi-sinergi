@@ -85,6 +85,7 @@
       __publicField(this, "alertTitle");
       __publicField(this, "alertDesc");
       __publicField(this, "alertCloseBtn");
+      __publicField(this, "alertTimeoutId", null);
       __publicField(this, "navInquiryBtn");
       __publicField(this, "navHistoryBtn");
       __publicField(this, "sectionPayment");
@@ -288,39 +289,58 @@
         subtitle.textContent = isInquiry ? "Inquiry & pembayaran tagihan PDAM" : "Monitor seluruh transaksi tersimpan";
     }
     showAlert(type, title, message) {
+      if (this.alertTimeoutId) {
+        clearTimeout(this.alertTimeoutId);
+        this.alertTimeoutId = null;
+      }
       this.alertBanner.classList.remove(
         "hidden",
         "bg-emerald-50",
         "border-emerald-200",
-        "text-emerald-900",
+        "text-emerald-950",
         "bg-red-50",
         "border-red-200",
+        "text-red-950",
+        "bg-sky-50",
+        "border-sky-200",
+        "text-sky-950",
+        "bg-emerald-50/95",
+        "border-emerald-200/80",
+        "text-emerald-900",
+        "bg-red-50/95",
+        "border-red-200/80",
         "text-red-900",
-        "bg-blue-50",
-        "border-blue-200",
-        "text-blue-900"
+        "bg-accent-50/95",
+        "border-accent-100",
+        "text-ink-900"
       );
       const config = {
         success: {
-          cls: ["bg-emerald-50/95", "border-emerald-200/80", "text-emerald-900"],
+          cls: ["bg-emerald-50", "border-emerald-200", "text-emerald-950"],
           icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#10b981"/><path d="M6 10.2l2.6 2.6L14 7.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         },
         error: {
-          cls: ["bg-red-50/95", "border-red-200/80", "text-red-900"],
+          cls: ["bg-red-50", "border-red-200", "text-red-950"],
           icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#ef4444"/><path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
         },
         info: {
-          cls: ["bg-accent-50/95", "border-accent-100", "text-ink-900"],
-          icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#0071e3"/><path d="M10 9v5M10 6.2v.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
+          cls: ["bg-sky-50", "border-sky-200", "text-sky-950"],
+          icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#0284c7"/><path d="M10 9v5M10 6.2v.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
         }
       }[type];
       this.alertBanner.classList.add(...config.cls);
       this.alertIcon.innerHTML = config.icon;
       this.alertTitle.textContent = title;
       this.alertDesc.textContent = message;
-      this.alertBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      this.alertTimeoutId = window.setTimeout(() => {
+        this.hideAlert();
+      }, 4500);
     }
     hideAlert() {
+      if (this.alertTimeoutId) {
+        clearTimeout(this.alertTimeoutId);
+        this.alertTimeoutId = null;
+      }
       this.alertBanner.classList.add("hidden");
     }
     setInquiryLoading(isLoading) {

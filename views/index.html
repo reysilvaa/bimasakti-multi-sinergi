@@ -43,8 +43,7 @@
           </svg>
         </div>
         <div class="leading-tight">
-          <span class="text-[14px] font-bold tracking-tight block">PDAM Pay</span>
-          <span class="text-[10px] text-ink-800/45 font-medium">Bimasakti Multi Sinergi</span>
+          <span class="text-[14px] font-bold tracking-tight block">PT. Bimasakti Multi Sinergi</span>
         </div>
       </div>
 
@@ -61,18 +60,12 @@
         </button>
       </nav>
 
-      <!-- Products summary (filled from /api/products) -->
       <div class="px-3 pb-4">
         <p class="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-800/35">Produk Aktif</p>
         <div id="sidebar-products" class="space-y-1"></div>
       </div>
-
-      <div class="px-5 py-4 border-t border-black/[0.05] text-[10px] text-ink-800/40 leading-relaxed">
-        Rajabiller Fastpay<br>MySQL + Drizzle ORM
-      </div>
     </aside>
 
-    <!-- ============ MAIN COLUMN ============ -->
     <div class="flex-1 md:ml-60 flex flex-col min-w-0">
 
       <!-- Topbar -->
@@ -82,22 +75,19 @@
           <p id="page-subtitle" class="text-[11px] text-ink-800/45 truncate">Inquiry & pembayaran tagihan PDAM</p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-full bg-emerald-50 border border-emerald-200/60 text-[11px] font-semibold text-emerald-700">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> API Terhubung
-          </span>
           <div class="w-8 h-8 rounded-full bg-mist-200 flex items-center justify-center text-[11px] font-bold text-ink-800/70">OP</div>
         </div>
       </header>
 
-      <!-- Alert (floating under topbar) -->
-      <div id="alert-banner" class="hidden mx-6 mt-4 rounded-2xl border p-4 shadow-lg bg-white/90 backdrop-blur-xl flex items-start gap-3 transition-all duration-300">
-        <div id="alert-icon" class="mt-0.5"></div>
+      <!-- Floating Toast Notification -->
+      <div id="alert-banner" class="hidden fixed top-5 right-6 z-50 max-w-md w-[calc(100%-3rem)] sm:w-auto min-w-[320px] rounded-2xl border p-4 shadow-2xl backdrop-blur-xl flex items-start gap-3 transition-all duration-300">
+        <div id="alert-icon" class="shrink-0 mt-0.5"></div>
         <div class="flex-1 min-w-0">
-          <h4 id="alert-title" class="text-sm font-semibold"></h4>
-          <p id="alert-desc" class="text-[13px] mt-0.5 text-ink-800/70"></p>
+          <h4 id="alert-title" class="text-[13px] font-bold tracking-tight"></h4>
+          <p id="alert-desc" class="text-[12px] mt-0.5 opacity-90 leading-snug"></p>
         </div>
-        <button id="alert-close-btn" class="text-ink-800/35 hover:text-ink-900 transition-colors" title="Tutup pemberitahuan" aria-label="Tutup pemberitahuan">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <button id="alert-close-btn" class="shrink-0 text-current opacity-40 hover:opacity-100 transition-opacity p-0.5" title="Tutup pemberitahuan" aria-label="Tutup pemberitahuan">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
       </div>
 
@@ -105,27 +95,6 @@
 
         <!-- ============ PAYMENT PAGE ============ -->
         <section id="section-payment">
-          <!-- Stat cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div class="rounded-2xl bg-white border border-black/[0.05] p-5">
-              <p class="text-[11px] font-medium uppercase tracking-wider text-ink-800/40">Test IDPEL Sidoarjo</p>
-              <p class="text-[17px] font-bold font-mono tracking-tight mt-1.5">01002676</p>
-              <p class="text-[11px] text-ink-800/45 mt-0.5">WASDA · sesuai spec</p>
-            </div>
-            <div class="rounded-2xl bg-white border border-black/[0.05] p-5">
-              <p class="text-[11px] font-medium uppercase tracking-wider text-ink-800/40">Test IDPEL Bondowoso</p>
-              <p class="text-[17px] font-bold font-mono tracking-tight mt-1.5">09000879</p>
-              <p class="text-[11px] text-ink-800/45 mt-0.5">WABONDO · sesuai spec</p>
-            </div>
-            <div class="rounded-2xl bg-ink-950 text-white border border-black/[0.05] p-5 flex flex-col justify-between">
-              <p class="text-[11px] font-medium uppercase tracking-wider text-white/50">Struk Terbit</p>
-              <div>
-                <p class="text-[17px] font-bold tracking-tight mt-1.5">Resmi & Sah</p>
-                <p class="text-[11px] text-white/55 mt-0.5">Bisa dicetak & diunduh TXT</p>
-              </div>
-            </div>
-          </div>
-
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
             <!-- Inquiry form card -->
@@ -181,8 +150,8 @@
               </div>
 
               <!-- Loading state -->
-              <div id="inquiry-loading-state" class="hidden rounded-2xl border border-black/[0.06] bg-white p-12 flex-col items-center justify-center min-h-[420px]">
-                <div class="w-10 h-10 rounded-full border-[3px] border-mist-200 border-t-accent-500 animate-spin mb-5"></div>
+              <div id="inquiry-loading-state" class="hidden rounded-2xl border border-black/[0.06] bg-white p-12 text-center flex flex-col items-center justify-center min-h-[420px]">
+                <div class="w-10 h-10 rounded-full border-[3px] border-mist-200 border-t-accent-500 animate-spin mb-4"></div>
                 <h3 class="text-[15px] font-semibold text-ink-900">Menghubungi server Rajabiller…</h3>
                 <p class="text-[13px] text-ink-800/50 mt-1.5">Mengambil rincian tagihan real-time.</p>
               </div>
@@ -195,9 +164,6 @@
                       <span id="res-pdam-badge" class="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent-500 block mb-1"></span>
                       <h3 class="text-[17px] font-bold tracking-tight">Tagihan ditemukan</h3>
                     </div>
-                    <span class="shrink-0 px-3 h-7 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold flex items-center gap-1.5 border border-emerald-200/70">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Siap bayar
-                    </span>
                   </div>
                   <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
                     <div>
@@ -342,21 +308,31 @@
 
   <!-- Receipt modal -->
   <div id="receipt-modal" class="fixed inset-0 z-[70] hidden bg-black/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden my-8">
-      <div class="px-6 py-4 flex items-center justify-between border-b border-black/[0.05]">
-        <h3 class="text-[15px] font-bold tracking-tight">Struk Pembayaran</h3>
-        <button type="button" id="btn-close-receipt-modal" class="w-7 h-7 rounded-full bg-black/[0.05] hover:bg-black/[0.09] flex items-center justify-center transition-colors text-ink-800/60" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
-          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden my-8 border border-black/[0.06]">
+      <div class="px-6 py-4 flex items-center justify-between border-b border-black/[0.06]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-black/[0.04] flex items-center justify-center text-ink-900">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-6.5 3.5V5A1.5 1.5 0 0 1 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <h3 class="text-[14px] font-bold tracking-tight">Struk Pembayaran</h3>
+            <p class="text-[11px] text-ink-800/40">Bukti transaksi sah PDAM</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-receipt-modal" class="w-8 h-8 rounded-xl bg-black/[0.04] hover:bg-black/[0.08] flex items-center justify-center transition-colors text-ink-800/60" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <div class="p-5 bg-mist-50">
-        <div class="receipt-paper bg-white p-5 rounded-xl border border-black/[0.07] font-mono text-xs text-ink-950 leading-relaxed overflow-x-auto whitespace-pre select-all" id="modal-receipt-content"></div>
+      <div class="p-6">
+        <div class="receipt-paper bg-mist-50/70 p-5 rounded-xl border border-black/[0.07] font-mono text-xs text-ink-950 leading-relaxed overflow-x-auto whitespace-pre select-all" id="modal-receipt-content"></div>
       </div>
-      <div class="px-6 py-4 border-t border-black/[0.05] flex flex-wrap gap-2 justify-end">
-        <button type="button" id="btn-print-receipt" class="h-9 px-4 rounded-full border border-black/[0.1] hover:bg-mist-50 text-[13px] font-semibold transition-colors flex items-center gap-1.5">
+      <div class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-end gap-2.5 bg-mist-50/30">
+        <button type="button" id="btn-print-receipt" class="h-10 px-4 rounded-xl border border-black/[0.1] hover:bg-white text-ink-900 text-[13px] font-semibold transition-all flex items-center gap-2 shadow-xs">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6v-7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Cetak</span>
         </button>
-        <a id="btn-download-receipt" href="#" download="" class="h-9 px-4 rounded-full bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-semibold transition-colors flex items-center gap-1.5">
+        <a id="btn-download-receipt" href="#" download="" class="h-10 px-4 rounded-xl bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-semibold transition-all flex items-center gap-2 shadow-sm shadow-accent-500/20">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Unduh TXT</span>
         </a>
       </div>
