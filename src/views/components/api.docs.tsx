@@ -590,12 +590,9 @@ export function ApiDocs() {
           {/* Interactive Request Tester (Scalar Live Playground) */}
           <div className="bg-white rounded-2xl border border-black/[0.06] p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" />
-                <h4 className="text-[14px] font-bold text-ink-950">
-                  Interactive Live Request 
-                </h4>
-              </div>
+              <h4 className="text-[14px] font-bold text-ink-950">
+                Interactive Request Tester
+              </h4>
               <button
                 type="button"
                 id="execute-api-test-btn"
