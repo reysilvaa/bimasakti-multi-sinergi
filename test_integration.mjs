@@ -67,14 +67,13 @@ async function runTests() {
 
     assert.strictEqual(inqWasdaRes.rc, '00', 'WASDA inquiry must succeed');
     const d = inqWasdaRes.data;
-    console.log('RAW WASDA DATA:', d);
     assert.strictEqual(d.idpel, '01002676');
     assert.strictEqual(d.nominal, 294500, 'Nominal must match 294500');
     assert.strictEqual(d.admin, 10806, 'Admin must match 10806');
     assert.strictEqual(d.total_bayar, 305306, 'Total must match 305306');
     assert.ok(typeof d.data_bill === 'object' && !Array.isArray(d.data_bill), 'data_bill is an object map');
     assert.ok(d.data_bill.blth1, 'data_bill contains blth1');
-    assert.ok(d.nomet, 'nomet is present');
+    assert.strictEqual(typeof d.nomet, 'string', 'nomet is present as string');
     for (const [key, b] of Object.entries(d.data_bill)) {
       assert.ok(key.startsWith('blth'), 'key starts with blth');
       assert.ok(typeof b.air === 'number' && typeof b.denda === 'number', 'bill amounts numeric');
