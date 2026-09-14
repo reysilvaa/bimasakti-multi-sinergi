@@ -3,8 +3,6 @@ import {
   Badge,
   Button,
   Card,
-  Input,
-  Select,
   StatCard,
   Table,
   TableBody,

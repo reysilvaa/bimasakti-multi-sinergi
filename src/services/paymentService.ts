@@ -59,8 +59,10 @@ export class PaymentService {
         receiptText: generateReceiptText(savedTx),
         keterangan: result.keterangan,
       };
-    } catch (err: any) {
-      if (err && (err.code === "ER_DUP_ENTRY" || err.errno === 1062)) {
+    } catch (err: unknown) {
+      // SAFETY: standard MySQL duplicate key error inspection
+      const error = err as { code?: string; errno?: number } | null;
+      if (error && (error.code === "ER_DUP_ENTRY" || error.errno === 1062)) {
         const stored = await TransactionRepository.findByRef2(input.ref2);
         if (stored) {
           throw new ApiError(

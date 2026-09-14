@@ -7,5 +7,3 @@ export const paymentRequestSchema = z.object({
   ref2: z.string(),
   nominal: z.union([z.string(), z.number()]),
 });
-
-export type PaymentRequest = z.infer<typeof paymentRequestSchema>;

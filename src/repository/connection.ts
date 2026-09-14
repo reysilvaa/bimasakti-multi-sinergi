@@ -19,5 +19,3 @@ export function getDatabase(): MySql2Database {
   dbInstance = drizzle(pool);
   return dbInstance;
 }
-
-export type Database = MySql2Database;

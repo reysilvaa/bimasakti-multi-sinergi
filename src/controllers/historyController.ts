@@ -9,7 +9,7 @@ export async function listTransactions(
 ): Promise<void> {
   const parsed = parseInt(String(req.query.limit || "100"), 10);
   const transactions = await HistoryService.list(
-    isNaN(parsed) ? undefined : parsed,
+    Number.isNaN(parsed) ? undefined : parsed,
   );
   res.json(
     envelope(RC.SUCCESS, "Daftar transaksi berhasil didapatkan.", transactions),
@@ -44,7 +44,7 @@ export async function downloadReceipt(
 
 function parseId(req: Request): number {
   const id = parseInt(req.params.id as string, 10);
-  if (isNaN(id)) {
+  if (Number.isNaN(id)) {
     throw new ApiError(RC.INVALID_IDPEL, "ID transaksi tidak valid.");
   }
   return id;

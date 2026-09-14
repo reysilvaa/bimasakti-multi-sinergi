@@ -1,6 +1,6 @@
 import { RAJABILLER } from "@/config/rajabiller.js";
 import { ApiError } from "@/domain/errors.js";
-import type { InquiryData, SpecBill } from "@/domain/inquiry.js";
+import type { InquiryData } from "@/domain/inquiry.js";
 import { type PdamProductCode, SUPPORTED_PRODUCTS } from "@/domain/product.js";
 import { RC } from "@/domain/protocol.js";
 import type {
@@ -96,7 +96,7 @@ export class RajabillerService {
     const ref1Value =
       ref1 ||
       `INQ_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const payload = this.buildRequest(
+    const payload = RajabillerService.buildRequest(
       "fastpay.inq",
       productCode,
       customerId,
@@ -119,7 +119,7 @@ export class RajabillerService {
     >;
     keterangan: string;
   }> {
-    const payload = this.buildRequest(
+    const payload = RajabillerService.buildRequest(
       "fastpay.pay",
       params.productCode,
       params.customerId,

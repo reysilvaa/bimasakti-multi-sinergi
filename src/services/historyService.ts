@@ -4,8 +4,8 @@ import type { TransactionRecord } from "@/domain/transaction.js";
 import { TransactionRepository } from "@/repository/transaction.repository.js";
 import { generateReceiptText } from "@/services/receiptService.js";
 
-export const MAX_HISTORY_LIMIT = 500;
-export const DEFAULT_HISTORY_LIMIT = 100;
+const MAX_HISTORY_LIMIT = 500;
+const DEFAULT_HISTORY_LIMIT = 100;
 
 export class HistoryService {
   public static async list(limit?: number): Promise<TransactionRecord[]> {

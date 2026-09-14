@@ -17,12 +17,16 @@
 		"enabled": true,
 		"rules": {
 			"preset": "recommended",
+			"complexity": {
+				"noStaticOnlyClass": "off"
+			},
 			"style": {
 				"noNonNullAssertion": "off"
 			},
 			"a11y": {
 				"useKeyWithClickEvents": "off",
-				"noStaticElementInteractions": "off"
+				"noStaticElementInteractions": "off",
+				"noSvgWithoutTitle": "off"
 			}
 		}
 	},

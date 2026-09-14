@@ -20,10 +20,7 @@ const MONTH_NAMES = [
   "DES",
 ];
 
-export function toSpecBill(
-  raw: RajabillerRawResponse,
-  i: number,
-): SpecBill | null {
+function toSpecBill(raw: RajabillerRawResponse, i: number): SpecBill | null {
   const bulan = (raw[`monthperiod${i}`] || "").trim();
   const tahunRaw = (raw[`yearperiod${i}`] || "").trim();
   const airStr = (raw[`billamount${i}`] || "").trim();
@@ -56,7 +53,7 @@ export function extractBills(
   return bills;
 }
 
-export function formatReceiptDate(rawWaktu?: string): string {
+function formatReceiptDate(rawWaktu?: string): string {
   if (!rawWaktu || rawWaktu.length < 14) {
     const d = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
@@ -67,7 +64,7 @@ export function formatReceiptDate(rawWaktu?: string): string {
 
 const dot = (n: number): string => n.toLocaleString("id-ID");
 
-export function periodLabel(b: SpecBill): string {
+function periodLabel(b: SpecBill): string {
   const idx = toInt(b.bulan) - 1;
   return `${MONTH_NAMES[idx] || b.bulan} ${b.tahun}`;
 }
@@ -83,8 +80,8 @@ function wrapWords(text: string, maxLen = 50): string[] {
   for (const word of words) {
     if (!current) {
       current = word;
-    } else if ((current + " " + word).length <= maxLen) {
-      current += " " + word;
+    } else if (`${current} ${word}`.length <= maxLen) {
+      current += ` ${word}`;
     } else {
       result.push(current);
       current = word;
@@ -109,7 +106,7 @@ export function generateReceiptText(tx: TransactionRecord): string {
     bills.length > 0
       ? bills.map(
           (b) =>
-            `${("  " + periodLabel(b)).padEnd(15, " ")}: Rp${dot(b.air).padStart(14, " ")}`,
+            `${`  ${periodLabel(b)}`.padEnd(15, " ")}: Rp${dot(b.air).padStart(14, " ")}`,
         )
       : [
           `${"  BULAN 1".padEnd(15, " ")}: Rp${dot(tx.nominal).padStart(14, " ")}`,

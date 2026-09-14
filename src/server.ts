@@ -18,8 +18,6 @@ app.use(cors());
 app.use(express.json());
 
 const viewsPath = path.resolve(__dirname, "../views");
-app.set("view engine", "ejs");
-app.set("views", viewsPath);
 
 app.use(express.static(viewsPath, { index: false }));
 
@@ -29,7 +27,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return next();
   }
-  res.render("index");
+  res.sendFile(path.join(viewsPath, "index.html"));
 });
 
 app.use(errorHandler);

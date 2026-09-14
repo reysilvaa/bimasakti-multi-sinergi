@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { ApiError } from "@/domain/errors.js";
 import { envelope, RC } from "@/domain/protocol.js";
 
-export function httpStatusFor(err: ApiError): number {
+function httpStatusFor(err: ApiError): number {
   switch (err.rc) {
     case RC.INVALID_PRODUCT:
     case RC.INVALID_IDPEL:

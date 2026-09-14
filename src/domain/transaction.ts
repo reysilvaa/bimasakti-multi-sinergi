@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { pdamProductCodeSchema } from "@/domain/product.js";
 
-export const transactionRecordSchema = z.object({
+const transactionRecordSchema = z.object({
   id: z.number().int(),
   ref1: z.string(),
   ref2: z.string(),

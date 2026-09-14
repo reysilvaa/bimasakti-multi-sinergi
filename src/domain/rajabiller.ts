@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const rajabillerRequestSchema = z.object({
+const rajabillerRequestSchema = z.object({
   method: z.enum(["fastpay.inq", "fastpay.pay"]),
   uid: z.string(),
   pin: z.string(),
@@ -15,7 +15,7 @@ export const rajabillerRequestSchema = z.object({
 });
 export type RajabillerRequest = z.infer<typeof rajabillerRequestSchema>;
 
-export const rajabillerResponseSchema = z
+const rajabillerResponseSchema = z
   .object({
     kodeproduk: z.string().optional(),
     waktu: z.string().optional(),

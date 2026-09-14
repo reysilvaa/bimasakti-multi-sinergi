@@ -36,7 +36,7 @@ export class TransactionRepository {
     const db = getDatabase();
     const result = await db.insert(transactions).values(data);
     const insertedId = Number(result[0].insertId);
-    const fetched = await this.findById(insertedId);
+    const fetched = await TransactionRepository.findById(insertedId);
     if (!fetched) {
       throw new Error("Failed to retrieve created transaction");
     }

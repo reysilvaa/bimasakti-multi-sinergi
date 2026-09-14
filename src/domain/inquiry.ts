@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const specBillSchema = z.object({
+const specBillSchema = z.object({
   air: z.number().int(),
   denda: z.number().int(),
   nonair: z.number().int(),
@@ -10,7 +10,7 @@ export const specBillSchema = z.object({
   tahun: z.string(),
 });
 
-export const inquiryDataSchema = z.object({
+const inquiryDataSchema = z.object({
   idpel: z.string(),
   nomet: z.string(),
   nometer: z.string().optional(),
