@@ -1,9 +1,9 @@
-import type { InquiryData } from "../domain/inquiry.js";
-import type { PdamProductCode } from "../domain/product.js";
-import { isSupportedProduct } from "../domain/product.js";
-import { RC } from "../domain/protocol.js";
-import { ApiError } from "../domain/errors.js";
-import { RajabillerService } from "./rajabillerService.js";
+import { ApiError } from "@/domain/errors.js";
+import type { InquiryData } from "@/domain/inquiry.js";
+import type { PdamProductCode } from "@/domain/product.js";
+import { isSupportedProduct } from "@/domain/product.js";
+import { RC } from "@/domain/protocol.js";
+import { RajabillerService } from "@/services/rajabillerService.js";
 
 export class InquiryService {
   public static async inquire(input: {

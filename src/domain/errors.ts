@@ -1,4 +1,4 @@
-import { RC } from "./protocol.js";
+import { RC } from "@/domain/protocol.js";
 
 export class ApiError extends Error {
   public readonly rc: string;

@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { RC, envelope } from "../domain/protocol.js";
-import { ApiError } from "../domain/errors.js";
+import { ApiError } from "@/domain/errors.js";
+import { envelope, RC } from "@/domain/protocol.js";
 
 export function httpStatusFor(err: ApiError): number {
   switch (err.rc) {

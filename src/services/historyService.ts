@@ -1,8 +1,8 @@
-import { RC } from "../domain/protocol.js";
-import type { TransactionRecord } from "../domain/transaction.js";
-import { TransactionRepository } from "../repository/transaction.repository.js";
-import { ApiError } from "../domain/errors.js";
-import { generateReceiptText } from "./receiptService.js";
+import { ApiError } from "@/domain/errors.js";
+import { RC } from "@/domain/protocol.js";
+import type { TransactionRecord } from "@/domain/transaction.js";
+import { TransactionRepository } from "@/repository/transaction.repository.js";
+import { generateReceiptText } from "@/services/receiptService.js";
 
 export const MAX_HISTORY_LIMIT = 500;
 export const DEFAULT_HISTORY_LIMIT = 100;

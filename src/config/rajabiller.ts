@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 export const RAJABILLER = {
   URL:
     process.env.RAJABILLER_URL ||

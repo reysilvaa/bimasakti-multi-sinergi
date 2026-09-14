@@ -1,7 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
-import type { TransactionRecord } from "../domain/transaction.js";
-import { getDatabase } from "./connection.js";
-import { type NewTransactionRow, transactions } from "./schema.js";
+import type { TransactionRecord } from "@/domain/transaction.js";
+import { getDatabase } from "@/repository/connection.js";
+import { type NewTransactionRow, transactions } from "@/repository/schema.js";
 
 function toRecord(row: typeof transactions.$inferSelect): TransactionRecord {
   return {

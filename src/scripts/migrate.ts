@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { drizzle } from "drizzle-orm/mysql2";
 import { migrate } from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
-import { CONFIG } from "../config/constants.js";
+import { CONFIG } from "@/config/constants.js";
 
 const MIGRATIONS_DIR = path.resolve(process.cwd(), "drizzle");
 

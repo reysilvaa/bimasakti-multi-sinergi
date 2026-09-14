@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pdamProductCodeSchema } from "./product.js";
+import { pdamProductCodeSchema } from "@/domain/product.js";
 
 export const transactionRecordSchema = z.object({
   id: z.number().int(),

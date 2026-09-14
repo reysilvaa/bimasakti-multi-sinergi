@@ -239,8 +239,8 @@
           if (presetWrap) {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5";
-            btn.textContent = `${p.name} (${p.code}: ${p.defaultIdpel})`;
+            btn.className = "px-4 py-2 rounded-full text-[13px] font-medium bg-white text-ink-900 border border-black/[0.08] hover:border-black/[0.16] hover:shadow-sm transition-all";
+            btn.textContent = `${p.name} \xB7 ${p.defaultIdpel}`;
             btn.addEventListener("click", () => {
               this.productSelect.value = p.code;
               this.customerIdInput.value = p.defaultIdpel;
@@ -256,8 +256,8 @@
       const isInquiry = tab === "inquiry";
       this.sectionPayment.classList.toggle("hidden", !isInquiry);
       this.sectionHistory.classList.toggle("hidden", isInquiry);
-      const activeClass = "px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-600 text-white shadow-sm flex items-center gap-2";
-      const inactiveClass = "px-4 py-2 rounded-md text-sm font-medium transition-all text-blue-200 hover:text-white hover:bg-blue-800/50 flex items-center gap-2";
+      const activeClass = "px-4 h-8 rounded-full text-[13px] font-medium transition-all bg-white shadow-sm text-ink-900 flex items-center gap-1.5";
+      const inactiveClass = "px-4 h-8 rounded-full text-[13px] font-medium transition-all text-ink-800/60 hover:text-ink-900 flex items-center gap-1.5";
       this.navInquiryBtn.className = isInquiry ? activeClass : inactiveClass;
       this.navHistoryBtn.className = isInquiry ? inactiveClass : activeClass;
     }
@@ -276,20 +276,20 @@
       );
       const config = {
         success: {
-          cls: ["bg-emerald-50", "border-emerald-200", "text-emerald-900"],
-          icon: "fa-circle-check text-emerald-600"
+          cls: ["bg-emerald-50/95", "border-emerald-200/80", "text-emerald-900"],
+          icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#10b981"/><path d="M6 10.2l2.6 2.6L14 7.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         },
         error: {
-          cls: ["bg-red-50", "border-red-200", "text-red-900"],
-          icon: "fa-circle-exclamation text-red-600"
+          cls: ["bg-red-50/95", "border-red-200/80", "text-red-900"],
+          icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#ef4444"/><path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
         },
         info: {
-          cls: ["bg-blue-50", "border-blue-200", "text-blue-900"],
-          icon: "fa-circle-info text-blue-600"
+          cls: ["bg-accent-50/95", "border-accent-100", "text-ink-900"],
+          icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#0071e3"/><path d="M10 9v5M10 6.2v.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
         }
       }[type];
       this.alertBanner.classList.add(...config.cls);
-      this.alertIcon.innerHTML = `<i class="fa-solid ${config.icon}"></i>`;
+      this.alertIcon.innerHTML = config.icon;
       this.alertTitle.textContent = title;
       this.alertDesc.textContent = message;
       this.alertBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -309,7 +309,7 @@
         }
       }
       this.btnSubmitInquiry.disabled = isLoading;
-      this.btnSubmitInquiry.innerHTML = isLoading ? '<i class="fa-solid fa-spinner animate-spin"></i><span>Memeriksa...</span>' : '<i class="fa-solid fa-magnifying-glass"></i><span>Cek Tagihan (Inquiry)</span>';
+      this.btnSubmitInquiry.innerHTML = isLoading ? '<svg class="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-opacity="0.25" stroke-width="2"/><path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Memeriksa\u2026</span>' : "<span>Cek Tagihan</span>";
     }
     async handleInquirySubmit() {
       this.hideAlert();
@@ -375,7 +375,6 @@
       tbody.innerHTML = "";
       bills.forEach((bill) => {
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50/80 transition-colors";
         const meter = bill.meterAkhir - bill.meterAwal;
         const monthIdx = parseInt(bill.bulan, 10) - 1;
         const MONTHS = [
@@ -394,14 +393,11 @@
         ];
         const label = `${MONTHS[monthIdx] || bill.bulan} ${bill.tahun}`;
         tr.innerHTML = `
-        <td class="py-3 px-4 font-semibold text-slate-800 flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-          <span>${label}</span>
-        </td>
-        ${hasMeter ? `<td class="py-3 px-4 font-mono text-slate-600">${meter > 0 ? meter + " m\xB3" : "-"}</td>` : ""}
-        <td class="py-3 px-4 text-right font-mono tabular-nums text-slate-800 font-medium">${formatRupiah(bill.air)}</td>
-        <td class="py-3 px-4 text-right font-mono tabular-nums ${bill.denda > 0 ? "text-rose-600 font-semibold" : "text-slate-400"}">${formatRupiah(bill.denda)}</td>
-        ${hasNonair ? `<td class="py-3 px-4 text-right font-mono tabular-nums text-slate-700">${formatRupiah(bill.nonair)}</td>` : ""}
+        <td class="py-2.5 pr-4 font-semibold text-ink-900">${label}</td>
+        ${hasMeter ? `<td class="py-2.5 pr-4 text-ink-800/60 tabular-nums">${meter > 0 ? meter + " m\xB3" : "-"}</td>` : ""}
+        <td class="py-2.5 px-4 text-right tabular-nums text-ink-900">${formatRupiah(bill.air)}</td>
+        <td class="py-2.5 px-4 text-right tabular-nums ${bill.denda > 0 ? "text-red-600 font-medium" : "text-ink-800/35"}">${formatRupiah(bill.denda)}</td>
+        ${hasNonair ? `<td class="py-2.5 pl-4 text-right tabular-nums text-ink-800/70">${formatRupiah(bill.nonair)}</td>` : ""}
       `;
         tbody.appendChild(tr);
       });
@@ -440,7 +436,7 @@
       }
       const inq = this.currentInquiry;
       this.btnProceedPayment.disabled = true;
-      this.btnProceedPayment.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Memproses Pembayaran...</span>';
+      this.btnProceedPayment.innerHTML = '<svg class="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-opacity="0.25" stroke-width="2"/><path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Memproses\u2026</span>';
       try {
         const res = await fetch("/api/payment", {
           method: "POST",
@@ -469,7 +465,7 @@
         );
       } finally {
         this.btnProceedPayment.disabled = false;
-        this.btnProceedPayment.innerHTML = '<i class="fa-solid fa-credit-card"></i><span>Konfirmasi & Bayar Sekarang</span>';
+        this.btnProceedPayment.innerHTML = "<span>Bayar Sekarang</span>";
       }
     }
     openReceiptModal(receiptText, transactionId) {
@@ -528,25 +524,23 @@
       this.historyEmptyRow.classList.add("hidden");
       records.forEach((tx) => {
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
         const isSuccess = tx.status === "00";
-        const statusBadge = isSuccess ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">SUKSES</span>' : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${tx.status === "33" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}">${tx.statusDescription || "GAGAL"}</span>`;
+        const statusBadge = isSuccess ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">SUKSES</span>' : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border ${tx.status === "33" ? "bg-amber-50 text-amber-700 border-amber-200/60" : "bg-red-50 text-red-700 border-red-200/60"}">${tx.statusDescription || "GAGAL"}</span>`;
         tr.innerHTML = `
-        <td class="py-3 px-4 whitespace-nowrap text-slate-500">${tx.createdAt}</td>
-        <td class="py-3 px-4 font-mono font-medium text-slate-800">${tx.noResi || tx.ref2}</td>
-        <td class="py-3 px-4 font-semibold text-slate-800">${tx.pdamName}</td>
-        <td class="py-3 px-4 font-mono text-slate-600">${tx.customerId}</td>
-        <td class="py-3 px-4 font-medium text-slate-800">${tx.customerName || "-"}</td>
-        <td class="py-3 px-4 text-right font-bold text-slate-900">${formatRupiah(tx.totalAmount)}</td>
+        <td class="py-3 px-5 whitespace-nowrap text-ink-800/55 tabular-nums">${tx.createdAt}</td>
+        <td class="py-3 px-4 font-mono text-[12px] font-medium text-ink-900">${tx.noResi || tx.ref2}</td>
+        <td class="py-3 px-4 font-medium text-ink-900">${tx.pdamName}</td>
+        <td class="py-3 px-4 font-mono text-[12px] text-ink-800/65">${tx.customerId}</td>
+        <td class="py-3 px-4 text-ink-800/80">${tx.customerName || "-"}</td>
+        <td class="py-3 px-4 text-right font-semibold tabular-nums">${formatRupiah(tx.totalAmount)}</td>
         <td class="py-3 px-4 text-center">${statusBadge}</td>
-        <td class="py-3 px-4 text-center">
-          <div class="flex items-center justify-center gap-1.5">
-            <button type="button" data-tx-id="${tx.id}" class="btn-view-receipt px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-xs transition-colors flex items-center gap-1">
-              <i class="fa-solid fa-eye text-xs"></i>
-              <span>Struk</span>
+        <td class="py-3 px-5 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button type="button" data-tx-id="${tx.id}" class="btn-view-receipt h-7 px-3 rounded-full border border-black/[0.1] hover:bg-mist-50 text-ink-900 font-semibold text-xs transition-colors">
+              Struk
             </button>
-            <a href="/api/transactions/${tx.id}/receipt" download="struk_${tx.id}.txt" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-colors" title="Download TXT">
-              <i class="fa-solid fa-download"></i>
+            <a href="/api/transactions/${tx.id}/receipt" download="struk_${tx.id}.txt" class="w-7 h-7 rounded-full border border-black/[0.1] hover:bg-mist-50 text-ink-800/60 flex items-center justify-center transition-colors" title="Download TXT">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v8m0 0L3.5 5.5M7 9l3.5-3.5M1.5 12.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
           </div>
         </td>

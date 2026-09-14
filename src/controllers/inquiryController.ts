@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { inquiryRequestSchema } from "../domain/inquiry.js";
-import { InquiryService } from "../services/inquiryService.js";
-import { RC, envelope } from "../domain/protocol.js";
+import { inquiryRequestSchema } from "@/domain/inquiry.js";
+import { envelope, RC } from "@/domain/protocol.js";
+import { InquiryService } from "@/services/inquiryService.js";
 
 export async function inquiry(req: Request, res: Response): Promise<void> {
   const body = inquiryRequestSchema.parse(req.body);

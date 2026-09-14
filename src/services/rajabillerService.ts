@@ -1,16 +1,16 @@
-import { RAJABILLER } from "../config/rajabiller.js";
-import type { InquiryData, SpecBill } from "../domain/inquiry.js";
-import { PdamProductCode, SUPPORTED_PRODUCTS } from "../domain/product.js";
+import { RAJABILLER } from "@/config/rajabiller.js";
+import { ApiError } from "@/domain/errors.js";
+import type { InquiryData, SpecBill } from "@/domain/inquiry.js";
+import { type PdamProductCode, SUPPORTED_PRODUCTS } from "@/domain/product.js";
+import { RC } from "@/domain/protocol.js";
 import type {
   RajabillerRawResponse,
   RajabillerRequest,
-} from "../domain/rajabiller.js";
-import { RC } from "../domain/protocol.js";
-import { ApiError } from "../domain/errors.js";
-import type { TransactionRecord } from "../domain/transaction.js";
-import { toInt } from "../utils/helpers.js";
-import { terbilang } from "../utils/terbilang.js";
-import { extractBills } from "./receiptService.js";
+} from "@/domain/rajabiller.js";
+import type { TransactionRecord } from "@/domain/transaction.js";
+import { extractBills } from "@/services/receiptService.js";
+import { toInt } from "@/utils/helpers.js";
+import { terbilang } from "@/utils/terbilang.js";
 
 function toInquiryData(
   raw: RajabillerRawResponse,

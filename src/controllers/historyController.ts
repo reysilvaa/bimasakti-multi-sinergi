@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
-import { RC } from "../domain/protocol.js";
-import { HistoryService } from "../services/historyService.js";
-import { ApiError } from "../domain/errors.js";
-import { envelope } from "../domain/protocol.js";
+import { ApiError } from "@/domain/errors.js";
+import { envelope, RC } from "@/domain/protocol.js";
+import { HistoryService } from "@/services/historyService.js";
 
 export async function listTransactions(
   req: Request,

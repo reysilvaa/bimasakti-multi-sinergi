@@ -1,10 +1,10 @@
-import { isSupportedProduct, type PdamProductCode } from "../domain/product.js";
-import { RC } from "../domain/protocol.js";
-import type { TransactionRecord } from "../domain/transaction.js";
-import { TransactionRepository } from "../repository/transaction.repository.js";
-import { ApiError } from "../domain/errors.js";
-import { RajabillerService } from "./rajabillerService.js";
-import { generateReceiptText } from "./receiptService.js";
+import { ApiError } from "@/domain/errors.js";
+import { isSupportedProduct, type PdamProductCode } from "@/domain/product.js";
+import { RC } from "@/domain/protocol.js";
+import type { TransactionRecord } from "@/domain/transaction.js";
+import { TransactionRepository } from "@/repository/transaction.repository.js";
+import { RajabillerService } from "@/services/rajabillerService.js";
+import { generateReceiptText } from "@/services/receiptService.js";
 
 export class PaymentService {
   public static async pay(input: {

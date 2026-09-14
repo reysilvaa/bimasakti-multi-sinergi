@@ -1,9 +1,9 @@
-import type { SpecBill } from "../domain/inquiry.js";
-import { SUPPORTED_PRODUCTS } from "../domain/product.js";
-import type { RajabillerRawResponse } from "../domain/rajabiller.js";
-import { type TransactionRecord } from "../domain/transaction.js";
-import { toInt } from "../utils/helpers.js";
-import { terbilang } from "../utils/terbilang.js";
+import type { SpecBill } from "@/domain/inquiry.js";
+import { SUPPORTED_PRODUCTS } from "@/domain/product.js";
+import type { RajabillerRawResponse } from "@/domain/rajabiller.js";
+import type { TransactionRecord } from "@/domain/transaction.js";
+import { toInt } from "@/utils/helpers.js";
+import { terbilang } from "@/utils/terbilang.js";
 
 const MONTH_NAMES = [
   "JAN",

@@ -1,6 +1,6 @@
 import { drizzle, type MySql2Database } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { CONFIG } from "../config/constants.js";
+import { CONFIG } from "@/config/constants.js";
 
 let dbInstance: MySql2Database | null = null;
 

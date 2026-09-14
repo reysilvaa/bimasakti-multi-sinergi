@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build:server": "tsc -p tsconfig.json",
+    "build:server": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "build:client": "esbuild src/views/app.ts --bundle --outfile=views/js/app.js --format=iife --target=es2020",
     "build": "npm run clean:dist && npm run build:client && npm run build:server",
     "clean:dist": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
@@ -35,6 +35,7 @@
     "decomment": "^0.9.5",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.2",
+    "tsc-alias": "^1.9.5",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }

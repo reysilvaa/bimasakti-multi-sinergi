@@ -1,45 +1,118 @@
+/* Apple-style base: SF-like type scale, quiet motion, pill controls. */
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: -0.011em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-#inquiry-result-card {
-  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+/* Softer focus ring everywhere */
+:focus-visible {
+  outline: 2px solid #0071e3;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
+/* Quiet global transitions (Apple-like, nothing bouncy) */
+button,
+a,
+input,
+select {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Alert banner entrance */
+#alert-banner {
+  animation: banner-in 0.3s ease both;
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Result card entrance */
+#inquiry-result-card:not(.hidden) {
+  animation: card-in 0.35s ease both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bill table rows */
+#res-bills-tbody tr {
+  transition: background-color 0.15s ease;
+}
+#res-bills-tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Receipt paper (keep the ticket look, soften it) */
 .receipt-paper {
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
   background-color: #ffffff;
-  position: relative;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px dashed #cbd5e1;
-  border-radius: 4px;
-  line-height: 1.6;
+  line-height: 1.65;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.receipt-paper::before,
-.receipt-paper::after {
-  content: '';
-  display: block;
-  height: 6px;
-  background-size: 12px 6px;
-  background-repeat: repeat-x;
+/* History rows */
+#history-tbody tr {
+  transition: background-color 0.15s ease;
+}
+#history-tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
-.receipt-paper::before {
-  margin-top: -5px;
-  margin-bottom: 8px;
-  background-image: radial-gradient(circle at 6px 0px, transparent 4px, #ffffff 4px);
+/* Scrollbar (subtle, macOS-like) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-
-.receipt-paper::after {
-  margin-top: 8px;
-  margin-bottom: -5px;
-  background-image: radial-gradient(circle at 6px 6px, transparent 4px, #ffffff 4px);
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 @media print {
@@ -57,6 +130,7 @@ body {
     width: 100%;
     height: auto;
     background: none;
+    backdrop-filter: none;
     padding: 0;
     margin: 0;
   }
@@ -71,8 +145,7 @@ body {
   #btn-print-receipt,
   #btn-download-receipt,
   header,
-  footer,
-  nav {
+  footer {
     display: none !important;
   }
 }

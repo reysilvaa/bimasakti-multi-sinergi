@@ -5,357 +5,297 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistem Pembayaran PDAM - Bimasakti Multi Sinergi</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'monospace'],
+          },
+          colors: {
+            ink: { 950: '#08080a', 900: '#101013', 800: '#1d1d20' },
+            mist: { 50: '#f5f5f7', 100: '#eeeef1', 200: '#d2d2d7' },
+            accent: { 50: '#f0f7ff', 100: '#e0efff', 500: '#0071e3', 600: '#0062c4', 700: '#0053a6' },
+          },
+          borderRadius: { '2xl': '1.125rem', '3xl': '1.75rem' },
+        },
+      },
+    };
+  </script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-white text-ink-900 font-sans min-h-screen flex flex-col antialiased">
 
-  <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-inner">
-          <i class="fa-solid fa-faucet-drip"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight">PDAM Pay Gateway</h1>
-          <p class="text-xs text-blue-200">PT Bimasakti Multi Sinergi &bull; Rajabiller Link</p>
-        </div>
-      </div>
+  <!-- Global alert banner -->
+  <div id="alert-banner" class="hidden fixed top-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-lg rounded-2xl border p-4 shadow-2xl backdrop-blur-xl bg-white/80 flex items-start gap-3 transition-all duration-300">
+    <div id="alert-icon" class="text-lg mt-0.5"></div>
+    <div class="flex-1 min-w-0">
+      <h4 id="alert-title" class="text-sm font-semibold"></h4>
+      <p id="alert-desc" class="text-sm mt-0.5 text-ink-800/80"></p>
+    </div>
+    <button id="alert-close-btn" class="text-mist-400 hover:text-ink-900 transition-colors" title="Tutup pemberitahuan" aria-label="Tutup pemberitahuan">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 
-      <nav class="flex space-x-1 bg-blue-950/60 p-1 rounded-lg">
-        <button id="nav-inquiry-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-600 text-white shadow-sm flex items-center gap-2">
-          <i class="fa-solid fa-receipt"></i>
+  <!-- Slim translucent nav -->
+  <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-black/[0.06]">
+    <nav class="max-w-5xl mx-auto px-6 h-12 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 shrink-0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2.5c3.5 4.2 6.5 7.9 6.5 11.4A6.5 6.5 0 0 1 12 20.5a6.5 6.5 0 0 1-6.5-6.6C5.5 10.4 8.5 6.7 12 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9.4 13.9a2.6 2.6 0 0 0 2.6 2.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-sm font-semibold tracking-tight">PDAM Pay</span>
+      </a>
+
+      <div class="flex items-center gap-1 rounded-full bg-black/[0.04] p-1" role="tablist">
+        <button id="nav-inquiry-btn" role="tab" class="px-4 h-8 rounded-full text-[13px] font-medium transition-all bg-white shadow-sm text-ink-900 flex items-center gap-1.5">
           <span>Bayar Tagihan</span>
         </button>
-        <button id="nav-history-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-blue-200 hover:text-white hover:bg-blue-800/50 flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>Riwayat Transaksi</span>
+        <button id="nav-history-btn" role="tab" class="px-4 h-8 rounded-full text-[13px] font-medium transition-all text-ink-800/60 hover:text-ink-900 flex items-center gap-1.5">
+          <span>Riwayat</span>
         </button>
-      </nav>
-    </div>
+      </div>
+    </nav>
   </header>
 
-  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-    
-    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl border flex items-start gap-3 transition-all duration-300">
-      <div id="alert-icon" class="text-lg mt-0.5"></div>
-      <div class="flex-1">
-        <h4 id="alert-title" class="text-sm font-semibold"></h4>
-        <p id="alert-desc" class="text-sm mt-0.5"></p>
-      </div>
-      <button id="alert-close-btn" class="text-slate-400 hover:text-slate-600" title="Tutup pemberitahuan" aria-label="Tutup pemberitahuan">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
+  <main class="flex-grow w-full max-w-5xl mx-auto px-6">
 
-    <section id="section-payment" class="space-y-6">
-      <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-        <div class="relative z-10 max-w-2xl">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/30 text-blue-100 mb-3 backdrop-blur-sm border border-blue-400/20">
-            <i class="fa-solid fa-bolt text-yellow-300"></i> Fastpay API Live Integration
-          </span>
-          <h2 class="text-2xl font-bold">Pembayaran Tagihan Air PDAM</h2>
-          <p class="text-blue-100 text-sm mt-1 leading-relaxed">
-            Lakukan pengecekan (Inquiry) tagihan PDAM secara real-time, lalu selesaikan pembayaran dengan konfirmasi aman.
-          </p>
-        </div>
-        <div class="absolute -right-8 -bottom-10 opacity-10 text-9xl pointer-events-none">
-          <i class="fa-solid fa-water"></i>
-        </div>
+    <!-- HERO -->
+    <section class="pt-20 pb-14 text-center">
+      <p class="text-[13px] font-medium text-accent-500 mb-3">Integrasi langsung Rajabiller Fastpay</p>
+      <h1 class="text-[44px] md:text-[56px] leading-[1.05] font-bold tracking-[-0.02em] text-ink-950">
+        Bayar tagihan air,<br class="hidden md:block"> jadi satu langkah mudah.
+      </h1>
+      <p class="mt-5 text-[17px] md:text-[19px] leading-relaxed text-ink-800/60 max-w-2xl mx-auto">
+        Cek tagihan PDAM Sidoarjo dan Bondowoso secara real-time,
+        lalu selesaikan pembayaran dengan struk resmi yang bisa diunduh.
+      </p>
+    </section>
+
+    <!-- Quick test idpel chips -->
+    <section id="section-payment" class="space-y-6 pb-24">
+      <div class="flex flex-wrap items-center justify-center gap-2" id="preset-buttons">
+        <span class="px-4 py-2 rounded-full text-[13px] font-medium bg-mist-50 text-ink-800/50 border border-black/[0.04]">Memuat produk…</span>
       </div>
 
-      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2 text-sm text-slate-600">
-          <i class="fa-solid fa-vial-circle-check text-blue-600"></i>
-          <span class="font-medium">Test IDPEL Cepat (Skill Test):</span>
-        </div>
-        <div class="flex flex-wrap gap-2" id="preset-buttons">
-          <button type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5">
-            <i class="fa-solid fa-city text-blue-500"></i>
-            <span>Memuat produk...</span>
-          </button>
-        </div>
-      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-5">
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div class="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-5">
-              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                1
-              </div>
-              <h3 class="text-base font-bold text-slate-800">Formulir Inquiry</h3>
-            </div>
+        <!-- Inquiry form -->
+        <div class="lg:col-span-5 lg:sticky lg:top-20">
+          <div class="rounded-3xl border border-black/[0.06] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.04)] p-7">
+            <h2 class="text-xl font-bold tracking-tight">Cek tagihan</h2>
+            <p class="text-[13px] text-ink-800/55 mt-1 mb-6">Inquiry real-time ke server PDAM.</p>
 
-            <form id="form-inquiry" class="space-y-4">
+            <form id="form-inquiry" class="space-y-5">
               <div>
-                <label for="product-select" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Pilih Wilayah PDAM <span class="text-red-500">*</span>
-                </label>
+                <label for="product-select" class="block text-[13px] font-medium text-ink-800 mb-1.5">Wilayah PDAM</label>
                 <div class="relative">
-                  <select id="product-select" name="productCode" required class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all appearance-none">
-                    <option value="WASDA">PDAM SIDOARJO (WASDA)</option>
-                    <option value="WABONDO">PDAM BONDOWOSO (WABONDO)</option>
+                  <select id="product-select" name="productCode" required class="w-full appearance-none rounded-xl bg-mist-50 border border-black/[0.06] px-4 py-3 text-[15px] font-medium text-ink-950 focus:bg-white focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10 outline-none transition-all">
+                    <option value="WASDA">PDAM Sidoarjo (WASDA)</option>
+                    <option value="WABONDO">PDAM Bondowoso (WABONDO)</option>
                   </select>
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                  </div>
-                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                  </div>
+                  <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-ink-800/40" width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M1 1l4.5 4.5L10 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
               </div>
 
               <div>
-                <label for="customer-id-input" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Nomor ID Pelanggan (IDPEL) <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                  <input type="text" id="customer-id-input" name="customerId" required placeholder="Contoh: 01002676" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all tracking-wide" />
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-id-card"></i>
-                  </div>
-                </div>
-                <p class="text-xs text-slate-500 mt-1">Masukkan ID Pelanggan PDAM yang terdaftar.</p>
+                <label for="customer-id-input" class="block text-[13px] font-medium text-ink-800 mb-1.5">Nomor ID Pelanggan</label>
+                <input type="text" id="customer-id-input" name="customerId" required placeholder="Contoh: 01002676" class="w-full rounded-xl bg-mist-50 border border-black/[0.06] px-4 py-3 text-[15px] font-medium tracking-wide placeholder:text-ink-800/30 focus:bg-white focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10 outline-none transition-all" />
+                <p class="text-xs text-ink-800/45 mt-1.5">Tertera pada tagihan bulanan PDAM Anda.</p>
               </div>
 
-              <div class="pt-2">
-                <button type="submit" id="btn-submit-inquiry" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl text-sm transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2">
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                  <span>Cek Tagihan (Inquiry)</span>
-                </button>
-              </div>
+              <button type="submit" id="btn-submit-inquiry" class="w-full h-12 rounded-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 text-white text-[15px] font-semibold transition-all flex items-center justify-center gap-2">
+                <span>Cek Tagihan</span>
+              </button>
             </form>
           </div>
         </div>
 
-        <div class="lg:col-span-7">
-          
-          <div id="inquiry-empty-state" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[360px]">
-            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mb-4">
-              <i class="fa-solid fa-file-invoice-dollar"></i>
+        <!-- Result panel -->
+        <div class="lg:col-span-7 min-h-[420px]">
+          <!-- Empty state -->
+          <div id="inquiry-empty-state" class="rounded-3xl border border-dashed border-black/[0.08] bg-mist-50/50 p-12 text-center flex flex-col items-center justify-center min-h-[420px]">
+            <div class="w-14 h-14 rounded-2xl bg-white border border-black/[0.06] shadow-sm flex items-center justify-center mb-4 text-ink-800/30">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-6.5 3.5V5A1.5 1.5 0 0 1 7 3.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
             </div>
-            <h4 class="text-base font-bold text-slate-700">Belum Ada Tagihan yang Diperiksa</h4>
-            <p class="text-sm text-slate-500 max-w-sm mt-1.5">
-              Pilih wilayah PDAM dan masukkan nomor ID Pelanggan di sebelah kiri, kemudian klik tombol <strong>"Cek Tagihan"</strong>.
-            </p>
+            <h3 class="text-[15px] font-semibold text-ink-900">Belum ada tagihan diperiksa</h3>
+            <p class="text-[13px] text-ink-800/50 max-w-xs mt-1.5 leading-relaxed">Masukkan wilayah dan nomor ID Pelanggan, lalu klik Cek Tagihan.</p>
           </div>
 
-          <div id="inquiry-loading-state" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[360px]">
-            <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-            <h4 class="text-base font-bold text-slate-800">Menghubungi Server Rajabiller...</h4>
-            <p class="text-sm text-slate-500 mt-1">Mengambil rincian tagihan secara real-time.</p>
+          <!-- Loading state -->
+          <div id="inquiry-loading-state" class="hidden rounded-3xl border border-black/[0.06] bg-white p-12 text-center flex-col items-center justify-center min-h-[420px]">
+            <div class="w-10 h-10 rounded-full border-[3px] border-mist-200 border-t-accent-500 animate-spin mb-5"></div>
+            <h3 class="text-[15px] font-semibold text-ink-900">Menghubungi server Rajabiller…</h3>
+            <p class="text-[13px] text-ink-800/50 mt-1.5">Mengambil rincian tagihan real-time.</p>
           </div>
 
-          <div id="inquiry-result-card" class="hidden bg-white rounded-2xl shadow-md border border-slate-200/80 overflow-hidden transition-all duration-300">
-            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800 shadow-inner">
-              <div class="flex items-center gap-3.5">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30 shadow-sm shadow-emerald-500/10">
-                  <i class="fa-solid fa-check"></i>
+          <!-- Result card -->
+          <div id="inquiry-result-card" class="hidden rounded-3xl border border-black/[0.06] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div class="px-7 pt-7 pb-5 border-b border-black/[0.05]">
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <span id="res-pdam-badge" class="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent-500 block mb-1"></span>
+                  <h3 class="text-lg font-bold tracking-tight">Tagihan ditemukan</h3>
+                </div>
+                <span class="shrink-0 px-3 h-7 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold flex items-center gap-1.5 border border-emerald-200/70">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Siap bayar
+                </span>
+              </div>
+              <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                <div>
+                  <span class="text-[11px] font-medium uppercase tracking-wider text-ink-800/45 block">ID Pelanggan</span>
+                  <p id="res-customer-id" class="text-[14px] font-semibold font-mono tracking-wide mt-0.5"></p>
                 </div>
                 <div>
-                  <span id="res-pdam-badge" class="text-[11px] uppercase tracking-wider font-bold text-sky-300 block"></span>
-                  <h3 class="text-base font-bold text-white tracking-tight">Rincian Tagihan Ditemukan</h3>
+                  <span class="text-[11px] font-medium uppercase tracking-wider text-ink-800/45 block">Nama</span>
+                  <p id="res-customer-name" class="text-[14px] font-semibold truncate mt-0.5"></p>
+                </div>
+                <div>
+                  <span class="text-[11px] font-medium uppercase tracking-wider text-ink-800/45 block">Jumlah bulan</span>
+                  <p id="res-bill-count" class="text-[14px] font-semibold text-accent-500 mt-0.5"></p>
+                </div>
+                <div class="col-span-2 sm:col-span-3">
+                  <span class="text-[11px] font-medium uppercase tracking-wider text-ink-800/45 block">Alamat</span>
+                  <p id="res-customer-address" class="text-[13px] text-ink-800/75 mt-0.5 leading-relaxed"></p>
                 </div>
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Status: Siap Bayar
-              </span>
             </div>
 
-            <div class="p-6 space-y-6">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/60 flex flex-col justify-between">
-                  <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-id-card text-blue-500 text-xs"></i> ID Pelanggan
-                  </span>
-                  <p id="res-customer-id" class="text-sm font-bold text-slate-800 font-mono tracking-wide mt-1.5"></p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/60 flex flex-col justify-between">
-                  <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-user text-blue-500 text-xs"></i> Nama Pelanggan
-                  </span>
-                  <p id="res-customer-name" class="text-sm font-bold text-slate-800 truncate mt-1.5"></p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/60 flex flex-col justify-between">
-                  <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-calendar-days text-blue-500 text-xs"></i> Jumlah Bulan
-                  </span>
-                  <p id="res-bill-count" class="text-sm font-bold text-blue-700 mt-1.5"></p>
-                </div>
-                <div class="sm:col-span-3 p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/60 flex items-start gap-2.5">
-                  <div class="text-slate-400 mt-0.5 text-xs"><i class="fa-solid fa-location-dot text-blue-500"></i></div>
-                  <div class="min-w-0 flex-1">
-                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Alamat Pelanggan</span>
-                    <p id="res-customer-address" class="text-xs font-semibold text-slate-700 mt-0.5 leading-relaxed"></p>
-                  </div>
-                </div>
-              </div>
-
+            <div class="px-7 py-6 space-y-6">
               <div>
-                <div class="flex items-center justify-between mb-2.5">
-                  <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-list-check text-blue-600"></i>
-                    <span>Rincian Tagihan per Periode</span>
-                  </h4>
-                  <span class="text-[11px] font-medium text-slate-400">Rupiah (IDR)</span>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-[13px] font-semibold text-ink-900">Rincian per periode</h4>
+                  <span class="text-[11px] text-ink-800/40">Rupiah (IDR)</span>
                 </div>
-                <div class="overflow-hidden rounded-xl border border-slate-200 shadow-xs">
-                  <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
-                      <tr>
-                        <th class="py-2.5 px-4">Periode</th>
-                        <th id="th-meter" class="py-2.5 px-4">Pemakaian</th>
-                        <th class="py-2.5 px-4 text-right">Air</th>
-                        <th class="py-2.5 px-4 text-right">Denda</th>
-                        <th id="th-misc" class="py-2.5 px-4 text-right">Non-Air</th>
-                      </tr>
-                    </thead>
-                    <tbody id="res-bills-tbody" class="divide-y divide-slate-100 font-medium text-slate-700">
-                    </tbody>
-                  </table>
-                </div>
+                <table class="w-full text-[13px]">
+                  <thead>
+                    <tr class="text-left text-[11px] uppercase tracking-wider text-ink-800/40 border-b border-black/[0.06]">
+                      <th class="py-2 pr-4 font-medium">Periode</th>
+                      <th id="th-meter" class="py-2 pr-4 font-medium">Pemakaian</th>
+                      <th class="py-2 px-4 text-right font-medium">Air</th>
+                      <th class="py-2 px-4 text-right font-medium">Denda</th>
+                      <th id="th-misc" class="py-2 pl-4 text-right font-medium">Non-Air</th>
+                    </tr>
+                  </thead>
+                  <tbody id="res-bills-tbody" class="divide-y divide-black/[0.04]"></tbody>
+                </table>
               </div>
 
-              <div class="p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-100/90 space-y-2.5 text-sm shadow-xs">
-                <div class="flex justify-between text-slate-600 text-xs">
-                  <span>Tagihan Pokok:</span>
-                  <span id="res-nominal" class="font-semibold text-slate-800 font-mono tabular-nums"></span>
+              <div class="rounded-2xl bg-mist-50 border border-black/[0.04] p-5 space-y-2 text-[13px]">
+                <div class="flex justify-between">
+                  <span class="text-ink-800/60">Tagihan pokok</span>
+                  <span id="res-nominal" class="font-semibold tabular-nums"></span>
                 </div>
-                <div id="row-denda-total" class="flex justify-between text-slate-600 text-xs">
-                  <span>Total Denda:</span>
-                  <span id="res-penalty-total" class="font-semibold text-slate-800 font-mono tabular-nums"></span>
+                <div class="flex justify-between">
+                  <span class="text-ink-800/60">Total denda</span>
+                  <span id="res-penalty-total" class="font-semibold tabular-nums"></span>
                 </div>
-                <div id="row-misc-total" class="flex justify-between text-slate-600 text-xs">
-                  <span>Total Non-Air:</span>
-                  <span id="res-misc-total" class="font-semibold text-slate-800 font-mono tabular-nums"></span>
+                <div id="row-misc-total" class="flex justify-between">
+                  <span class="text-ink-800/60">Total non-air</span>
+                  <span id="res-misc-total" class="font-semibold tabular-nums"></span>
                 </div>
-                <div class="flex justify-between text-slate-600 text-xs">
-                  <span>Biaya Admin Loket:</span>
-                  <span id="res-admin-fee" class="font-semibold text-slate-800 font-mono tabular-nums"></span>
+                <div class="flex justify-between">
+                  <span class="text-ink-800/60">Biaya admin loket</span>
+                  <span id="res-admin-fee" class="font-semibold tabular-nums"></span>
                 </div>
-                <div class="pt-3 border-t border-blue-200/70 flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1">
-                  <div>
-                    <span class="text-sm font-bold text-slate-900">Total Pembayaran:</span>
-                    <p id="res-terbilang" class="text-[11px] text-blue-700 font-medium italic mt-0.5"></p>
+                <div class="pt-3 mt-3 border-t border-black/[0.06] flex items-end justify-between gap-4">
+                  <div class="min-w-0">
+                    <span class="text-[13px] font-semibold">Total pembayaran</span>
+                    <p id="res-terbilang" class="text-[11px] text-ink-800/50 italic mt-0.5 leading-snug"></p>
                   </div>
-                  <span id="res-total-amount" class="text-2xl font-black text-blue-700 font-mono tracking-tight"></span>
+                  <span id="res-total-amount" class="text-[26px] leading-none font-bold text-accent-500 tabular-nums tracking-tight shrink-0"></span>
                 </div>
               </div>
 
-              <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                <button type="button" id="btn-cancel-inquiry" class="sm:w-1/3 py-2.5 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors text-center">
-                  Batal
-                </button>
-                <button type="button" id="btn-proceed-payment" class="sm:w-2/3 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                  <i class="fa-solid fa-credit-card"></i>
-                  <span>Konfirmasi & Bayar Sekarang</span>
+              <div class="flex flex-col-reverse sm:flex-row gap-3">
+                <button type="button" id="btn-cancel-inquiry" class="sm:flex-1 h-11 rounded-full border border-black/[0.1] hover:bg-mist-50 text-ink-900 font-semibold text-sm transition-colors">Batal</button>
+                <button type="button" id="btn-proceed-payment" class="sm:flex-[2] h-11 rounded-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2">
+                  <span>Bayar Sekarang</span>
                 </button>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>
 
-    <section id="section-history" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-slate-900">Riwayat Transaksi</h2>
-          <p class="text-sm text-slate-500 mt-0.5">Daftar seluruh pembayaran PDAM yang tersimpan di Database MySQL Internal.</p>
+    <!-- HISTORY -->
+    <section id="section-history" class="hidden pb-24">
+      <div class="pt-4 pb-8">
+        <h2 class="text-[32px] font-bold tracking-[-0.02em] text-center">Riwayat Transaksi</h2>
+        <p class="text-[15px] text-ink-800/55 text-center mt-2">Seluruh pembayaran tersimpan di database MySQL internal.</p>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="relative w-full max-w-xs">
+          <input type="text" id="history-search-input" placeholder="Cari IDPEL, nama, atau no. resi…" class="w-full rounded-full bg-mist-50 border border-black/[0.06] px-4 py-2.5 text-[13px] font-medium placeholder:text-ink-800/35 focus:bg-white focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10 outline-none transition-all" />
         </div>
-        <div class="flex items-center gap-2">
-          <button id="btn-refresh-history" class="px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-rotate"></i>
-            <span>Segarkan Data</span>
-          </button>
+        <div class="flex items-center gap-3 shrink-0">
+          <span class="text-[13px] text-ink-800/50 hidden sm:block"><span id="history-count-badge" class="font-semibold text-ink-900">0</span> transaksi</span>
+          <button id="btn-refresh-history" class="h-9 px-4 rounded-full border border-black/[0.1] hover:bg-mist-50 text-[13px] font-semibold transition-colors">Segarkan</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="relative w-full sm:w-72">
-            <input type="text" id="history-search-input" placeholder="Cari IDPEL, Nama, atau No. Resi..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-          </div>
-          <div class="text-xs font-medium text-slate-500">
-            Total Transaksi: <span id="history-count-badge" class="font-bold text-slate-800">0</span>
-          </div>
-        </div>
-
+      <div class="rounded-2xl border border-black/[0.06] overflow-hidden bg-white shadow-[0_2px_20px_rgba(0,0,0,0.03)]">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider">
-              <tr>
-                <th class="py-3 px-4">Waktu</th>
-                <th class="py-3 px-4">No. Resi</th>
-                <th class="py-3 px-4">PDAM</th>
-                <th class="py-3 px-4">IDPEL</th>
-                <th class="py-3 px-4">Nama Pelanggan</th>
-                <th class="py-3 px-4 text-right">Total Bayar</th>
-                <th class="py-3 px-4 text-center">Status</th>
-                <th class="py-3 px-4 text-center">Aksi</th>
+          <table class="w-full text-left text-[13px]">
+            <thead>
+              <tr class="text-[11px] uppercase tracking-wider text-ink-800/40 border-b border-black/[0.06] bg-mist-50/60">
+                <th class="py-3 px-5 font-medium">Waktu</th>
+                <th class="py-3 px-4 font-medium">No. Resi</th>
+                <th class="py-3 px-4 font-medium">PDAM</th>
+                <th class="py-3 px-4 font-medium">IDPEL</th>
+                <th class="py-3 px-4 font-medium">Nama</th>
+                <th class="py-3 px-4 text-right font-medium">Total</th>
+                <th class="py-3 px-4 text-center font-medium">Status</th>
+                <th class="py-3 px-5 text-right font-medium">Aksi</th>
               </tr>
             </thead>
-            <tbody id="history-tbody" class="divide-y divide-slate-200">
-            </tbody>
+            <tbody id="history-tbody" class="divide-y divide-black/[0.04]"></tbody>
           </table>
         </div>
-
-        <div id="history-empty-row" class="hidden p-12 text-center">
-          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xl mx-auto mb-3">
-            <i class="fa-solid fa-folder-open"></i>
-          </div>
-          <h5 class="text-sm font-bold text-slate-700">Belum Ada Riwayat Transaksi</h5>
-          <p class="text-xs text-slate-500 mt-1">Lakukan pembayaran tagihan pertama Anda untuk melihat riwayat di sini.</p>
+        <div id="history-empty-row" class="hidden p-14 text-center">
+          <h5 class="text-[15px] font-semibold text-ink-900">Belum ada transaksi</h5>
+          <p class="text-[13px] text-ink-800/50 mt-1">Riwayat pembayaran akan tampil di sini.</p>
         </div>
       </div>
     </section>
-
   </main>
 
-  <div id="receipt-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 transition-all transform animate-in fade-in zoom-in duration-200 my-8">
-      
-      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-receipt text-blue-400"></i>
-          <h3 class="text-sm font-bold tracking-tight">Struk Bukti Pembayaran Sah</h3>
-        </div>
-        <button type="button" id="btn-close-receipt-modal" class="text-slate-400 hover:text-white transition-colors" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
-          <i class="fa-solid fa-xmark text-base"></i>
+  <!-- Receipt modal -->
+  <div id="receipt-modal" class="fixed inset-0 z-[70] hidden bg-black/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden my-8">
+      <div class="px-6 py-4 flex items-center justify-between border-b border-black/[0.05]">
+        <h3 class="text-[15px] font-bold tracking-tight">Struk Pembayaran</h3>
+        <button type="button" id="btn-close-receipt-modal" class="w-7 h-7 rounded-full bg-black/[0.05] hover:bg-black/[0.09] flex items-center justify-center transition-colors text-ink-800/60" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
       </div>
-
-      <div class="p-6 bg-slate-100">
-        <div class="receipt-paper bg-white p-5 rounded-lg shadow-sm border border-slate-300 font-mono text-xs text-slate-900 leading-relaxed overflow-x-auto whitespace-pre select-all" id="modal-receipt-content">
-        </div>
+      <div class="p-5 bg-mist-50">
+        <div class="receipt-paper bg-white p-5 rounded-xl border border-black/[0.07] font-mono text-xs text-ink-950 leading-relaxed overflow-x-auto whitespace-pre select-all" id="modal-receipt-content"></div>
       </div>
-
-      <div class="bg-white px-5 py-4 border-t border-slate-200 flex flex-wrap gap-2 justify-end">
-        <button type="button" id="btn-print-receipt" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-print"></i>
-          <span>Cetak Struk</span>
+      <div class="px-6 py-4 border-t border-black/[0.05] flex flex-wrap gap-2 justify-end">
+        <button type="button" id="btn-print-receipt" class="h-9 px-4 rounded-full border border-black/[0.1] hover:bg-mist-50 text-[13px] font-semibold transition-colors flex items-center gap-1.5">
+          <span>Cetak</span>
         </button>
-        <a id="btn-download-receipt" href="#" download="" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm shadow-blue-500/20">
-          <i class="fa-solid fa-download"></i>
+        <a id="btn-download-receipt" href="#" download="" class="h-9 px-4 rounded-full bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-semibold transition-colors flex items-center gap-1.5">
           <span>Unduh TXT</span>
         </a>
       </div>
-
     </div>
   </div>
 
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    <p>&copy; 2026 PT Bimasakti Multi Sinergi &bull; Technical Skill Test PDAM Gateway</p>
+  <footer class="border-t border-black/[0.06] py-8">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-ink-800/45">
+      <p>© 2026 PT Bimasakti Multi Sinergi</p>
+      <p>Technical Skill Test — PDAM Payment Gateway</p>
+    </div>
   </footer>
 
   <script src="/js/app.js"></script>

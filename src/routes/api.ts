@@ -3,11 +3,11 @@ import {
   downloadReceipt,
   getTransaction,
   listTransactions,
-} from "../controllers/historyController.js";
-import { inquiry } from "../controllers/inquiryController.js";
-import { payment } from "../controllers/paymentController.js";
-import { SUPPORTED_PRODUCTS } from "../domain/product.js";
-import { RC } from "../domain/protocol.js";
+} from "@/controllers/historyController.js";
+import { inquiry } from "@/controllers/inquiryController.js";
+import { payment } from "@/controllers/paymentController.js";
+import { SUPPORTED_PRODUCTS } from "@/domain/product.js";
+import { RC } from "@/domain/protocol.js";
 
 const router = Router();
 
