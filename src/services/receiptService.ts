@@ -1,7 +1,6 @@
-import { TransactionRecord, SpecBill, PdamProductCode } from "../types/transaction.types.js";
-import { RajabillerRawResponse } from "../types/rajabiller.types.js";
+import { TransactionRecord, SpecBill, PdamProductCode, RajabillerRawResponse } from "../models/transaction.js";
 import { SUPPORTED_PRODUCTS } from "../config/constants.js";
-import { terbilang } from "./terbilang.js";
+import { terbilang } from "../utils/terbilang.js";
 import { toInt } from "../utils/helpers.js";
 
 const MONTH_NAMES = [
@@ -12,9 +11,9 @@ const MONTH_NAMES = [
 /** Raw Rajabiller period fields -> one spec bill (spec point 4 `data_bill`). */
 export function toSpecBill(raw: RajabillerRawResponse, i: number): SpecBill | null {
   const bulan = (raw[`monthperiod${i}`] || "").trim();
-  const tahun = (raw[`yearperiod${i}`] || "").trim();
+  const tahunRaw = (raw[`yearperiod${i}`] || "").trim();
   const airStr = (raw[`billamount${i}`] || "").trim();
-  if (!bulan || !tahun || !airStr) return null;
+  if (!bulan || !tahunRaw || !airStr) return null;
 
   const miscStr = (raw[`miscamount${i}`] || "").trim();
   const nonair = miscStr.includes("|")
@@ -29,7 +28,7 @@ export function toSpecBill(raw: RajabillerRawResponse, i: number): SpecBill | nu
     meterAwal: toInt(raw[`firstmeterread${i}`]),
     meterAkhir: toInt(raw[`lastmeterread${i}`]),
     bulan,
-    tahun,
+    tahun: tahunRaw.length === 2 ? `20${tahunRaw}` : tahunRaw,
   };
 }
 
@@ -55,6 +54,12 @@ export function formatReceiptDate(rawWaktu?: string): string {
 /** 40500 -> "40.500" (spec struk format). */
 const dot = (n: number): string => n.toLocaleString("id-ID");
 
+/** Spec bill -> struk period label, e.g. "AGS2014". */
+export function periodLabel(b: SpecBill): string {
+  const idx = toInt(b.bulan) - 1;
+  return `${MONTH_NAMES[idx] || b.bulan}${b.tahun}`;
+}
+
 export function generateReceiptText(tx: TransactionRecord): string {
   let raw: RajabillerRawResponse | null = null;
   try {
@@ -64,7 +69,7 @@ export function generateReceiptText(tx: TransactionRecord): string {
   const bills = raw ? extractBills(raw) : [];
   const pdamName = tx.pdamName || SUPPORTED_PRODUCTS[tx.productCode]?.name || "PDAM";
   const billLines = bills.length > 0
-    ? bills.map((b) => ` ${b.bulan}${b.tahun.slice(2)} :Rp ${dot(b.air)}`)
+    ? bills.map((b) => ` ${periodLabel(b)} :Rp ${dot(b.air)}`)
     : [` BULAN 1 :Rp ${dot(tx.nominal)}`];
 
   const lines: string[] = [

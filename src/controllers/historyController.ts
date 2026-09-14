@@ -1,15 +1,20 @@
 import { Request, Response } from "express";
-import { TransactionRepository } from "../database/transactionRepository.js";
-import { generateReceiptText } from "../services/receiptService.js";
-import { envelope } from "../utils/helpers.js";
+import { HistoryService } from "../services/historyService.js";
+import { ApiError } from "../utils/apiError.js";
+import { envelope } from "../utils/apiResponse.js";
+import { httpStatusFor, sendError } from "./errorMapper.js";
 
+/**
+ * Controller layer: history HTTP adapter.
+ * Parse HTTP input → call service → map result/ApiError to the spec envelope.
+ */
 export async function listTransactions(req: Request, res: Response): Promise<void> {
   try {
-    const limit = Math.min(parseInt(String(req.query.limit || "100"), 10) || 100, 500);
-    const transactions = TransactionRepository.findAll(limit);
+    const parsed = parseInt(String(req.query.limit || "100"), 10);
+    const transactions = await HistoryService.list(isNaN(parsed) ? undefined : parsed);
     res.json(envelope("00", "Daftar transaksi berhasil didapatkan.", transactions));
-  } catch (error: any) {
-    res.status(500).json(envelope("99", error.message || "Gagal mengambil data riwayat transaksi."));
+  } catch (err) {
+    sendError(res, err);
   }
 }
 
@@ -20,19 +25,12 @@ export async function getTransaction(req: Request, res: Response): Promise<void>
       res.status(400).json(envelope("02", "ID transaksi tidak valid."));
       return;
     }
-
-    const tx = TransactionRepository.findById(id);
-    if (!tx) {
-      res.status(404).json(envelope("04", "Transaksi tidak ditemukan."));
-      return;
-    }
-
-    res.json(envelope("00", "Detail transaksi berhasil didapatkan.", {
-      transaction: tx,
-      receiptText: generateReceiptText(tx),
-    }));
-  } catch (error: any) {
-    res.status(500).json(envelope("99", error.message || "Gagal mengambil detail transaksi."));
+    const { transaction, receiptText } = await HistoryService.getById(id);
+    res.json(
+      envelope("00", "Detail transaksi berhasil didapatkan.", { transaction, receiptText })
+    );
+  } catch (err) {
+    sendError(res, err);
   }
 }
 
@@ -43,18 +41,17 @@ export async function downloadReceipt(req: Request, res: Response): Promise<void
       res.status(400).send("ID transaksi tidak valid.");
       return;
     }
-
-    const tx = TransactionRepository.findById(id);
-    if (!tx) {
-      res.status(404).send("Transaksi tidak ditemukan.");
-      return;
-    }
-
-    const filename = `struk_${tx.productCode}_${tx.customerId}_${tx.id}.txt`;
+    const { transaction, receiptText } = await HistoryService.getById(id);
+    const filename = `struk_${transaction.productCode}_${transaction.customerId}_${transaction.id}.txt`;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.send(generateReceiptText(tx));
-  } catch (error: any) {
-    res.status(500).send(error.message || "Gagal mengunduh struk.");
+    res.send(receiptText);
+  } catch (err) {
+    const apiErr = ApiError.from(err);
+    res
+      .status(apiErr.rc === "04" ? 404 : 500)
+      .send(apiErr.rc === "04" ? "Transaksi tidak ditemukan." : apiErr.message);
   }
 }
+
+export { httpStatusFor };

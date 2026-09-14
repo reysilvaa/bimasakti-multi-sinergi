@@ -1,12 +1,31 @@
 import assert from 'node:assert';
-import fs from 'node:fs';
 import http from 'node:http';
 
-// Isolated test database — never touches ./data/database.sqlite.
-process.env.DATABASE_PATH = './data/test_integration.sqlite';
-if (fs.existsSync(process.env.DATABASE_PATH)) fs.unlinkSync(process.env.DATABASE_PATH);
+process.env.NODE_ENV = "test";
+// Isolated MySQL test database (created on the fly by runMigrations).
+process.env.DB_NAME = process.env.DB_TEST_NAME || 'bimasakti_pdam_test';
 
 const { default: app } = await import('./dist/server.js');
+const { runMigrations } = await import('./dist/scripts/migrate.js');
+
+// Ensure schema exists in the test DB (idempotent).
+await runMigrations();
+
+// Start from a clean slate: wipe rows between runs.
+const mysql = await import('mysql2/promise');
+{
+  const conn = await mysql.createConnection({
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME,
+  });
+  await conn.execute('SET FOREIGN_KEY_CHECKS = 0');
+  await conn.execute('TRUNCATE TABLE transactions');
+  await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
+  await conn.end();
+}
 
 const PORT = 3001;
 
@@ -161,6 +180,8 @@ async function runTests() {
     console.log('\n=== ALL 8 INTEGRATION TESTS PASSED ===');
   } finally {
     server.close();
+    // mysql2 pool keeps the event loop alive; exit explicitly.
+    process.exit(0);
   }
 }
 
@@ -168,3 +189,4 @@ runTests().catch((e) => {
   console.error('TEST FAILED:', e);
   process.exit(1);
 });
+

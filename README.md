@@ -1,271 +1,154 @@
 # Sistem Pembayaran Tagihan PDAM (Sidoarjo & Bondowoso)
 
-Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (PDAM Sidoarjo & PDAM Bondowoso) terintegrasi secara langsung dengan API Rajabiller Fastpay. Dibangun menggunakan **Node.js + Express.js** dengan **TypeScript (ES Modules)**, basis data portabel **SQLite**, serta antarmuka modern **HTML5, Tailwind CSS, dan TypeScript**.
+Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (PDAM Sidoarjo & PDAM Bondowoso) terintegrasi dengan API Rajabiller Fastpay, sesuai dokumen **Full Stack Dev Test (Rev 2.1.3)** PT. Bimasakti Multi Sinergi.
+
+**Node.js + Express + TypeScript (ESM)**, MySQL via **Drizzle ORM** (`mysql2` pool), frontend HTML5 + Tailwind + TypeScript (esbuild).
 
 ---
 
-## 📋 Daftar Isi
-- [Arsitektur & Alur Transaksi](#-arsitektur--alur-transaksi)
-- [Tech Stack](#-tech-stack)
-- [Struktur Folder](#-struktur-folder)
-- [Data Pemetaan Produk & IDPEL Uji Coba](#-data-pemetaan-produk--idpel-uji-coba)
-- [Spesifikasi Format Struk](#-spesifikasi-format-struk)
-- [Persyaratan Sistem](#-persyaratan-sistem)
-- [Panduan Instalasi & Menjalankan Program](#-panduan-instalasi--menjalankan-program)
-- [Spesifikasi Endpoint API](#-spesifikasi-endpoint-api)
-- [Pengujian Otomatis (E2E Test)](#-pengujian-otomatis-e2e-test)
+## Alur Transaksi (sesuai spec)
 
----
+1. User isi **select nama PDAM + input idpel** di frontend, klik Inquiry.
+2. Frontend → **API Internal** `POST /api/inquiry` → **Rajabiller** `fastpay.inq`.
+3. Rincian tagihan (format json point 4) ditampilkan, user lanjut Payment.
+4. Frontend → **API Internal** `POST /api/payment` → **Rajabiller** `fastpay.pay` (nominal & ref2 dari respon inquiry).
+5. API Internal simpan transaksi ke **MySQL internal** (Drizzle ORM) → tampilkan + unduh struk.
+6. **History** membaca DB internal, bisa ditampilkan berulang-ulang.
 
-## 🏛 Arsitektur & Alur Transaksi
+## List Produk Test (spec)
 
-Sistem ini mengimplementasikan alur transaksi 8 tahap sesuai spesifikasi:
-1. **Aktor (User)** mengakses halaman antarmuka Inquiry pada Frontend.
-2. **Frontend Inquiry** mengirimkan permintaan (request) ke **API Internal**.
-3. **API Internal** meneruskan request ke **API Inquiry Rajabiller** (`fastpay.inq`).
-4. Setelah inquiry berhasil dan rincian tagihan ditampilkan, Aktor dapat melanjutkan ke **Frontend Payment**.
-5. **Frontend Payment** mengirimkan konfirmasi pembayaran ke **API Internal**.
-6. **API Internal** memproses transaksi ke **API Payment Rajabiller** (`fastpay.pay`).
-7. Setelah pembayaran berhasil, **API Internal** menyimpan data transaksi ke dalam **DB Internal (SQLite)**.
-8. Aktor dapat melihat dan mengunduh struk pada menu **Riwayat Transaksi (Transaction History)** yang mengambil data dari **DB Internal**.
+| Produk          | Kode Produk | Idpel      |
+| :-------------- | :---------- | :--------- |
+| PDAM SIDOARJO   | `WASDA`     | `01002676` |
+| PDAM BONDOWOSO  | `WABONDO`   | `09000879` |
 
----
+Tombol pintasan Test IDPEL tersedia di UI (terisi otomatis dari `GET /api/products`).
 
-## 🛠 Tech Stack
+## Format API Internal (spec point 4)
 
-- **Backend**: Node.js (v20+) dengan Express.js
-  - Bahasa: **TypeScript** (Strict Mode, 0% `any`)
-  - Modul: **ECMAScript Modules (ESM)** dengan `import`/`export`
-  - Validasi & Penanganan Error terstruktur
-- **Frontend**:
-  - **HTML5 & Vanilla CSS / Tailwind CSS** (tampilan responsif & modern)
-  - **TypeScript** yang dibundel secara otomatis menggunakan `esbuild` ke `public/js/app.js`
-  - Font & Ikon: Inter Font, JetBrains Mono (Thermal Struk View), Font Awesome 6
-- **Database**:
-  - **SQLite** (`node:sqlite` bawaan standar Node.js) - Sangat portabel, zero-configuration, tanpa dependensi kompilasi C++ eksternal.
-  - Data tersimpan otomatis di berkas `./data/database.sqlite`.
+Semua endpoint mengembalikan envelope `{ "rc": "00", "ket": "sukses", "data": ... }`.
 
----
+Contoh respon inquiry (WASDA):
 
-## 📂 Struktur Folder
-
-```text
-bimasakti-multi-sinergi/
-├── .env                          # Konfigurasi Environment aktif
-├── .env.example                  # Template Environment
-├── .gitignore                    # Berkas yang diabaikan oleh Git
-├── package.json                  # Konfigurasi dependensi dan skrip npm
-├── tsconfig.json                 # Konfigurasi TypeScript NodeNext (ESM)
-├── README.md                     # Dokumentasi teknis lengkap
-├── test_integration.mjs         # Skrip pengujian otomatis E2E
-├── data/
-│   └── database.sqlite           # Berkas database SQLite internal
-├── public/                       # Berkas statis frontend
-│   ├── index.html                # Antarmuka SPA (Inquiry, Payment, History, Modal Struk)
-│   ├── css/
-│   │   └── style.css             # Gaya struk thermal & print stylesheet
-│   └── js/
-│       └── app.js                # Hasil kompilasi/bundle TypeScript frontend
-└── src/
-    ├── server.ts                 # Entry point Express Server
-    ├── config/
-    │   └── constants.ts          # Kredensial Rajabiller, Port, & Mapping Produk
-    ├── types/
-    │   ├── rajabiller.types.ts   # Tipe & Interface ketat API Rajabiller
-    │   └── transaction.types.ts  # Tipe internal transaksi, inquiry, & struk
-    ├── database/
-    │   ├── connection.ts         # Inisialisasi koneksi SQLite & DDL Skema
-    │   └── transactionRepository.ts # Operasi CRUD transaksi berbasis TypeScript
-    ├── services/
-    │   ├── rajabillerService.ts  # HTTP client ke gateway Rajabiller
-    │   ├── receiptService.ts     # Generator format struk Sidoarjo & Bondowoso
-    │   └── terbilang.ts          # Konversi angka ke kata nominal rupiah Indonesia
-    ├── controllers/
-    │   ├── inquiryController.ts  # Handler endpoint POST /api/inquiry
-    │   ├── paymentController.ts  # Handler endpoint POST /api/payment
-    │   └── historyController.ts  # Handler endpoint GET /api/transactions & struk
-    ├── routes/
-    │   └── api.ts                # Router Express untuk semua endpoint internal
-    └── frontend/
-        └── app.ts                # Logika antarmuka TypeScript untuk browser
-```
-
----
-
-## 🎯 Data Pemetaan Produk & IDPEL Uji Coba
-
-| Nama PDAM | Kode Produk | ID Pelanggan (IDPEL) Uji Coba | Catatan |
-| :--- | :---: | :---: | :--- |
-| **PDAM SIDOARJO** | `WASDA` | `01002676` | Tersedia 6 periode tagihan |
-| **PDAM BONDOWOSO** | `WABONDO` | `09000879` | Terdapat rincian Pemakaian (M3) & Beban |
-
-*(Tersedia tombol pintasan "Test IDPEL Cepat" pada antarmuka pengguna untuk pengisian otomatis).*
-
----
-
-## 🧾 Spesifikasi Format Struk
-
-Aplikasi menghasilkan struk bukti pembayaran yang **persis sama** dengan layout wajib berikut:
-
-### 1. Format PDAM Sidoarjo (`WASDA`):
-```text
-STRUK PEMBAYARAN PDAM SIDOARJO
-TANGGAL : [TANGGAL TRANSAKSI]
-NO. RESI : [NO RESI]
-NAMA PAM : PDAM SIDOARJO
-NO. PELANGGAN : [IDPEL]
-NAMA : [NAMA PELANGGAN]
-ALAMAT : [ALAMAT]
-RINCIAN TAGIHAN
- BULAN 1 : Rp [NOMINAL]
- BULAN 2 : Rp [NOMINAL]
-DENDA : Rp [DENDA]
-ADMIN : Rp [ADMIN]
- -------------------
-TOTAL TAGIHAN : Rp [TOTAL_BAYAR]
-TERBILANG : [TERBILANG TOTAL]
-PDAM SIDOARJO MENYATAKAN STRUK INI
-SEBAGAI BUKTI PEMBAYARAN YANG SAH
-```
-
-### 2. Format PDAM Bondowoso (`WABONDO`):
-```text
-STRUK PEMBAYARAN PDAM BONDOWOSO
-TANGGAL : [TANGGAL TRANSAKSI]
-NO. RESI : [NO RESI]
-NAMA PAM : PDAM BONDOWOSO
-NO. PELANGGAN : [IDPEL]
-NAMA : [NAMA PELANGGAN]
-ALAMAT : [ALAMAT]
-PEMAKAIAN : [METER] M3
-RINCIAN TAGIHAN
- BULAN 1 : Rp [NOMINAL]
-DENDA : Rp [DENDA]
-BEBAN : Rp [BEBAN]
-ADMIN : Rp [ADMIN]
- --------------------
-TOTAL TAGIHAN : Rp [TOTAL_BAYAR]
-TERBILANG : [TERBILANG TOTAL]
-PDAM BONDOWOSO MENYATAKAN STRUK INI
-SEBAGAI BUKTI PEMBAYARAN YANG SAH
-```
-
----
-
-## ⚙️ Persyaratan Sistem
-
-- **Node.js**: Versi `22.x` atau lebih baru (Mendukung ESM dan bawaan `node:sqlite`).
-- **NPM** atau **PNPM** package manager.
-
----
-
-## 🚀 Panduan Instalasi & Menjalankan Program
-
-### 1. Ekstrak Berkas & Buka Terminal
-Buka direktori proyek di terminal / Command Prompt:
-```bash
-cd bimasakti-multi-sinergi
-```
-
-### 2. Pasang Dependensi
-```bash
-npm install
-```
-*(Atau `pnpm install` jika menggunakan pnpm).*
-
-### 3. Konfigurasi Environment
-Berkas `.env` sudah disediakan secara default. Anda dapat menyesuaikannya bila diperlukan:
-```ini
-PORT=3000
-NODE_ENV=development
-RAJABILLER_URL=https://c-dev-partnerlink.rajabiller.com/json/index.php
-RAJABILLER_UID=SP300203
-RAJABILLER_PIN=311575
-DATABASE_PATH=./data/database.sqlite
-```
-
-### 4. Kompilasi TypeScript (Build)
-Jalankan kompilasi TypeScript untuk backend dan frontend:
-```bash
-npm run build
-```
-Skrip ini akan:
-- Mem-bundle `src/frontend/app.ts` menjadi `public/js/app.js`.
-- Mengompilasi seluruh kode backend TypeScript di `src/` menjadi JavaScript ESM di direktori `dist/`.
-
-### 5. Jalankan Server
-
-- **Mode Produksi**:
-  ```bash
-  npm start
-  ```
-
-- **Mode Development (Hot-Reloading)**:
-  ```bash
-  npm run dev
-  ```
-
-Akses antarmuka web melalui browser di:
-👉 **[http://localhost:3000](http://localhost:3000)**
-
----
-
-## 📡 Spesifikasi Endpoint API Internal
-
-### 1. `GET /api/products`
-Mengambil daftar produk PDAM yang didukung dan IDPEL sampel.
-
-### 2. `POST /api/inquiry`
-Melakukan inquiry tagihan ke server Rajabiller.
-- **Request Body**:
-  ```json
-  {
-    "productCode": "WASDA",
-    "customerId": "01002676"
-  }
-  ```
-- **Response Success (200)**:
-  Mengembalikan data tagihan ternormalisasi (`customerName`, `bills`, `nominal`, `adminFee`, `totalAmount`, `terbilang`, `ref1`, `ref2`).
-
-### 3. `POST /api/payment`
-Mengeksekusi pembayaran tagihan ke server Rajabiller dan menyimpan data ke database.
-- **Request Body**:
-  ```json
-  {
-    "productCode": "WASDA",
-    "customerId": "01002676",
+```json
+{
+  "rc": "00",
+  "ket": "Inquiry tagihan berhasil didapatkan.",
+  "data": {
+    "idpel": "01002676",
+    "nometer": "01/II/013/0083/6D",
+    "alamat": "SEKAWAN SEJUK C.16A",
+    "nama": "PERM. BUMI CITRA FAJAR",
+    "nominal": 294500,
+    "admin": 10806,
+    "total_bayar": 305306,
+    "jumlah_bulan": "6",
+    "data_bill": {
+      "blth1": { "air": 40500, "denda": 7500, "nonair": 0, "meter_awal": 0, "meter_akhir": 0, "bulan": "5", "tahun": "2024" },
+      "blth2": { "...": "loop sejumlah billquantity dari respon inq/pay" }
+    },
     "ref1": "INQ_...",
-    "ref2": "2818...",
-    "nominal": "294500"
+    "ref2": "28189..."
   }
-  ```
-- **Response Success (200)**:
-  Mengembalikan rekaman transaksi yang tersimpan di SQLite beserta teks struk tercetak (`receiptText`).
+}
+```
 
-### 4. `GET /api/transactions`
-Mengambil seluruh riwayat transaksi yang tersimpan di SQLite.
+## Endpoint API Internal
 
-### 5. `GET /api/transactions/:id`
-Mengambil rincian satu transaksi tertentu beserta format struknya.
+| Endpoint                                  | Fungsi                                                        |
+| :---------------------------------------- | :------------------------------------------------------------ |
+| `GET /api/products`                       | Daftar produk + idpel sample                                   |
+| `POST /api/inquiry`                       | `{ productCode, customerId }` → data tagihan (format di atas)  |
+| `POST /api/payment`                       | `{ productCode, customerId, ref1, ref2, nominal }` → simpan DB + struk |
+| `GET /api/transactions?limit=100`         | Riwayat transaksi (max 500)                                    |
+| `GET /api/transactions/:id`               | Detail transaksi + teks struk                                  |
+| `GET /api/transactions/:id/receipt`       | Unduh struk `.txt` (attachment)                                |
 
-### 6. `GET /api/transactions/:id/receipt`
-Mengunduh struk pembayaran dalam bentuk berkas teks `.txt` (`Content-Disposition: attachment`).
+**Proteksi pembayaran ganda:** `POST /api/payment` dengan `ref2` yang sudah tersimpan ditolak dengan `rc "33"` dan mengembalikan transaksi asli — tidak ada request kedua dikirim ke Rajabiller. Ditegakkan dua lapis: pre-check di service + `UNIQUE(ref2)` di MySQL (race-free; lost race tertangkap dari `ER_DUP_ENTRY`).
 
----
+## Struk (spec point 8)
 
-## 🧪 Pengujian Otomatis (E2E Test)
+Tersedia dua layout sesuai contoh: Sidoarjo (rincian bulanan + denda + admin) dan Bondowoso (plus `PEMAKAIAN M3` dan `BEBAN`). Tanggal format `dd-mm-yyyy HH:mm:ss`, nominal pakai pemisah titik (`40.500`), label periode `AGS2014`. Struk dapat dilihat di modal, dicetak, dan diunduh sebagai `.txt`.
 
-Proyek ini telah dilengkapi dengan suite automated integration test (`test_integration.mjs`) yang menguji keseluruhan siklus:
-1. Endpoint produk
-2. Inquiry PDAM Sidoarjo (`WASDA`)
-3. Inquiry PDAM Bondowoso (`WABONDO`)
-4. Payment eksekusi
-5. Verifikasi format struk (sesuai template)
-6. Riwayat transaksi database
-7. Unduh struk teks
+## Menjalankan
 
-Jalankan pengujian dengan perintah:
+1. **Install**: `npm install` (atau `pnpm install`).
+2. **Siapkan MySQL** (lokal atau remote), lalu buat database:
+
+   ```sql
+   CREATE DATABASE IF NOT EXISTS bimasakti_pdam CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+
+3. **Konfigurasi** — copy `.env.example` → `.env` dan sesuaikan:
+
+   ```ini
+   PORT=3000
+   NODE_ENV=development
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=
+   DB_NAME=bimasakti_pdam
+   DB_TEST_NAME=bimasakti_pdam_test
+   RAJABILLER_URL=https://c-dev-partnerlink.rajabiller.com/json/index.php
+   RAJABILLER_UID=SP300203
+   RAJABILLER_PIN=311575
+   ```
+
+4. **Build + migrasi schema** (`src/views/app.ts` → bundle esbuild, `src/` → `dist/`, schema Drizzle → MySQL):
+
+   ```bash
+   npm run build          # bersihkan dist + build client & server
+   npm run db:generate    # (sekali per perubahan schema) generate SQL migrasi
+   npm run db:migrate     # terapkan migrasi ke DB_NAME (auto-create DB bila belum ada)
+   ```
+
+5. **Jalankan**:
+   - Produksi: `npm start`
+   - Development (hot-reload): `npm run dev`
+6. Buka **http://localhost:3000**
+
+## Testing
+
 ```bash
 npm test
 ```
-Hasil seluruh tes akan tampil di terminal dengan status sukses (PASS).
+
+Suite E2E (8 test) memakai database MySQL terisolasi `bimasakti_pdam_test` (DB_TEST_NAME, auto-create + migrasi + truncate per run — tidak menyentuh DB aplikasi) dan menguji: produk, validasi inquiry, inquiry WASDA & WABONDO (assert nilai persis sesuai spec), payment + format struk, idempotensi `ref2`, history + guard `limit`, unduh struk + 404.
+
+> Catatan: test memanggil sandbox Rajabiller langsung (sesuai spec point 5). Karena tagihan sandbox WABONDO berstatus "sudah dibayar", test payment menguji jalur `status 33` yang tetap tersimpan & menghasilkan struk, lalu idempotensi memblokir replay-nya.
+
+## Struktur Folder (MVC: model → repository → service → controller → view)
+
+```text
+├── views/                          # VIEW (frontend statis): index.html, css, js hasil bundle
+├── drizzle/                        # Migrasi SQL hasil drizzle-kit (jangan edit manual)
+├── drizzle.config.ts               # Config drizzle-kit (baca ENV DB_*)
+├── src/
+│   ├── server.ts                   # Entry point Express
+│   ├── config/constants.ts         # ENV (PORT, DB_*, RAJABILLER_*) + SUPPORTED_PRODUCTS
+│   ├── models/                     # MODEL: entitas & tipe domain (murni, tanpa I/O)
+│   │   └── transaction.ts          #   TransactionRecord, InquiryData, DuplicatePaymentError
+│   ├── repository/                 # REPOSITORY: satu-satunya lapisan yang menyentuh SQL/DB
+│   │   ├── schema.ts               #   Definisi tabel Drizzle (transactions)
+│   │   ├── connection.ts           #   Pool MySQL + instance Drizzle
+│   │   └── transaction.repository.ts#  CRUD transactions (create/find/findById/findByRef2)
+│   ├── scripts/migrate.ts          # Runner migrasi (db:migrate; juga dipakai test)
+│   ├── services/                   # SERVICE: use case + business logic (validasi, idempotensi)
+│   │   ├── inquiryService.ts       #   Inquiry use case
+│   │   ├── paymentService.ts       #   Payment use case (idempotensi ref2 → rc 33)
+│   │   ├── historyService.ts       #   History use case (limit clamp 500)
+│   │   ├── rajabillerService.ts    #   Client fastpay.inq / fastpay.pay
+│   │   └── receiptService.ts       #   Generator struk Sidoarjo & Bondowoso
+│   ├── controllers/                # CONTROLLER: adapter HTTP tipis (parse → service → envelope)
+│   │   ├── inquiryController.ts
+│   │   ├── paymentController.ts
+│   │   ├── historyController.ts
+│   │   └── errorMapper.ts          #   ApiError.rc → HTTP status
+│   ├── routes/api.ts               # Router endpoint internal
+│   ├── utils/                      # apiResponse (envelope), terbilang, helpers, apiError
+│   └── views/app.ts                # VIEW logic: logika UI (dibundel esbuild → views/js/app.js)
+└── test_integration.mjs            # Suite E2E
+```
+
+**Arah dependensi (satu arah):** `view → controller → service → repository → model`. Model tidak mengimpor lapisan lain; controller tidak berisi business logic; hanya repository yang menulis SQL.

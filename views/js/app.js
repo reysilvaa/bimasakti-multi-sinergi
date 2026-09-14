@@ -4,7 +4,7 @@
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
-  // src/services/terbilang.ts
+  // src/utils/terbilang.ts
   var UNITS = [
     "",
     "SATU",
@@ -65,7 +65,7 @@
     return `${words} RUPIAH`;
   }
 
-  // src/frontend/app.ts
+  // src/views/app.ts
   var formatRupiah = (amount) => `Rp ${amount.toLocaleString("id-ID")}`;
   var PdamApp = class {
     constructor() {
@@ -221,9 +221,16 @@
       this.alertBanner.classList.add("hidden");
     }
     setInquiryLoading(isLoading) {
-      this.emptyStateEl.classList.toggle("hidden", isLoading);
-      this.resultCardEl.classList.add("hidden");
-      this.loadingStateEl.classList.toggle("hidden", !isLoading);
+      if (isLoading) {
+        this.emptyStateEl.classList.add("hidden");
+        this.loadingStateEl.classList.remove("hidden");
+        this.resultCardEl.classList.add("hidden");
+      } else {
+        this.loadingStateEl.classList.add("hidden");
+        if (!this.currentInquiry) {
+          this.emptyStateEl.classList.remove("hidden");
+        }
+      }
       this.btnSubmitInquiry.disabled = isLoading;
       this.btnSubmitInquiry.innerHTML = isLoading ? '<i class="fa-solid fa-spinner animate-spin"></i><span>Memeriksa...</span>' : '<i class="fa-solid fa-magnifying-glass"></i><span>Cek Tagihan (Inquiry)</span>';
     }
@@ -279,14 +286,20 @@
       tbody.innerHTML = "";
       bills.forEach((bill) => {
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.className = "hover:bg-slate-50/80 transition-colors";
         const meter = bill.meterAkhir - bill.meterAwal;
+        const monthIdx = parseInt(bill.bulan, 10) - 1;
+        const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGS", "SEP", "OKT", "NOV", "DES"];
+        const label = `${MONTHS[monthIdx] || bill.bulan} ${bill.tahun}`;
         tr.innerHTML = `
-        <td class="py-2 px-3 font-semibold text-slate-800">${bill.bulan}${bill.tahun}</td>
-        ${hasMeter ? `<td class="py-2 px-3">${meter > 0 ? meter + " m\xB3" : "-"}</td>` : ""}
-        <td class="py-2 px-3 text-right">${formatRupiah(bill.air)}</td>
-        <td class="py-2 px-3 text-right ${bill.denda > 0 ? "text-red-600 font-semibold" : "text-slate-400"}">${formatRupiah(bill.denda)}</td>
-        ${hasNonair ? `<td class="py-2 px-3 text-right">${formatRupiah(bill.nonair)}</td>` : ""}
+        <td class="py-3 px-4 font-semibold text-slate-800 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+          <span>${label}</span>
+        </td>
+        ${hasMeter ? `<td class="py-3 px-4 font-mono text-slate-600">${meter > 0 ? meter + " m\xB3" : "-"}</td>` : ""}
+        <td class="py-3 px-4 text-right font-mono tabular-nums text-slate-800 font-medium">${formatRupiah(bill.air)}</td>
+        <td class="py-3 px-4 text-right font-mono tabular-nums ${bill.denda > 0 ? "text-rose-600 font-semibold" : "text-slate-400"}">${formatRupiah(bill.denda)}</td>
+        ${hasNonair ? `<td class="py-3 px-4 text-right font-mono tabular-nums text-slate-700">${formatRupiah(bill.nonair)}</td>` : ""}
       `;
         tbody.appendChild(tr);
       });

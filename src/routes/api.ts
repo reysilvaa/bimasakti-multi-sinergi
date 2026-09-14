@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { handleInquiry } from "../controllers/inquiryController.js";
-import { handlePayment } from "../controllers/paymentController.js";
+import { inquiry } from "../controllers/inquiryController.js";
+import { payment } from "../controllers/paymentController.js";
 import {
   listTransactions,
   getTransaction,
@@ -22,8 +22,8 @@ router.get("/products", (_req, res) => {
   });
 });
 
-router.post("/inquiry", handleInquiry);
-router.post("/payment", handlePayment);
+router.post("/inquiry", inquiry);
+router.post("/payment", payment);
 
 router.get("/transactions", listTransactions);
 router.get("/transactions/:id", getTransaction);

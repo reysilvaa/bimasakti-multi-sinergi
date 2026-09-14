@@ -2,8 +2,8 @@
  * Frontend Application Logic for PDAM Payment Gateway.
  * Bundled via esbuild for browser execution.
  */
-import type { InquiryData, TransactionRecord, SpecBill } from "../types/transaction.types.js";
-import { terbilang } from "../services/terbilang.js";
+import type { InquiryData, TransactionRecord, SpecBill } from "../models/transaction.js";
+import { terbilang } from "../utils/terbilang.js";
 
 /** Formats integer as dotted Rupiah string (spec struk format: 40.500). */
 const formatRupiah = (amount: number): string => `Rp ${amount.toLocaleString("id-ID")}`;
@@ -197,9 +197,16 @@ class PdamApp {
   }
 
   private setInquiryLoading(isLoading: boolean): void {
-    this.emptyStateEl.classList.toggle('hidden', isLoading);
-    this.resultCardEl.classList.add('hidden');
-    this.loadingStateEl.classList.toggle('hidden', !isLoading);
+    if (isLoading) {
+      this.emptyStateEl.classList.add('hidden');
+      this.loadingStateEl.classList.remove('hidden');
+      this.resultCardEl.classList.add('hidden');
+    } else {
+      this.loadingStateEl.classList.add('hidden');
+      if (!this.currentInquiry) {
+        this.emptyStateEl.classList.remove('hidden');
+      }
+    }
     this.btnSubmitInquiry.disabled = isLoading;
     this.btnSubmitInquiry.innerHTML = isLoading
       ? '<i class="fa-solid fa-spinner animate-spin"></i><span>Memeriksa...</span>'
@@ -270,14 +277,20 @@ class PdamApp {
 
     bills.forEach((bill) => {
       const tr = document.createElement('tr');
-      tr.className = 'hover:bg-slate-50 transition-colors';
+      tr.className = 'hover:bg-slate-50/80 transition-colors';
       const meter = bill.meterAkhir - bill.meterAwal;
+      const monthIdx = parseInt(bill.bulan, 10) - 1;
+      const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGS", "SEP", "OKT", "NOV", "DES"];
+      const label = `${MONTHS[monthIdx] || bill.bulan} ${bill.tahun}`;
       tr.innerHTML = `
-        <td class="py-2 px-3 font-semibold text-slate-800">${bill.bulan}${bill.tahun}</td>
-        ${hasMeter ? `<td class="py-2 px-3">${meter > 0 ? meter + ' m³' : '-'}</td>` : ''}
-        <td class="py-2 px-3 text-right">${formatRupiah(bill.air)}</td>
-        <td class="py-2 px-3 text-right ${bill.denda > 0 ? 'text-red-600 font-semibold' : 'text-slate-400'}">${formatRupiah(bill.denda)}</td>
-        ${hasNonair ? `<td class="py-2 px-3 text-right">${formatRupiah(bill.nonair)}</td>` : ''}
+        <td class="py-3 px-4 font-semibold text-slate-800 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+          <span>${label}</span>
+        </td>
+        ${hasMeter ? `<td class="py-3 px-4 font-mono text-slate-600">${meter > 0 ? meter + ' m³' : '-'}</td>` : ''}
+        <td class="py-3 px-4 text-right font-mono tabular-nums text-slate-800 font-medium">${formatRupiah(bill.air)}</td>
+        <td class="py-3 px-4 text-right font-mono tabular-nums ${bill.denda > 0 ? 'text-rose-600 font-semibold' : 'text-slate-400'}">${formatRupiah(bill.denda)}</td>
+        ${hasNonair ? `<td class="py-3 px-4 text-right font-mono tabular-nums text-slate-700">${formatRupiah(bill.nonair)}</td>` : ''}
       `;
       tbody.appendChild(tr);
     });
