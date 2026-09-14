@@ -97,18 +97,26 @@ await esbuild.build({
   legalComments: "none",
 });
 
-// 5. Brotli & Gzip Pre-compression for Static Assets
+// 5. Zstd, Brotli & Gzip Pre-compression for Static Assets
 const assetsToCompress = [
   "views/js/app.js",
   "views/css/style.css",
   "views/index.html",
 ];
 
-console.log("⚡ Compressing static assets with Brotli & Gzip...");
+console.log("⚡ Compressing static assets with Zstd, Brotli & Gzip...");
 for (const relPath of assetsToCompress) {
   const fullPath = path.resolve(relPath);
   if (fs.existsSync(fullPath)) {
     const buffer = fs.readFileSync(fullPath);
+
+    // Zstandard (level 19 = high compression, ultra-fast decompression)
+    let zstKb = "N/A";
+    if (typeof zlib.zstdCompressSync === "function") {
+      const zst = zlib.zstdCompressSync(buffer, { level: 19 });
+      fs.writeFileSync(`${fullPath}.zst`, zst);
+      zstKb = (zst.length / 1024).toFixed(1);
+    }
 
     // Brotli (quality 11 = maximum compression)
     const br = zlib.brotliCompressSync(buffer, {
@@ -125,9 +133,9 @@ for (const relPath of assetsToCompress) {
     const origKb = (buffer.length / 1024).toFixed(1);
     const brKb = (br.length / 1024).toFixed(1);
     const gzKb = (gz.length / 1024).toFixed(1);
-    console.log(`  ${relPath}: ${origKb}KB -> br: ${brKb}KB | gz: ${gzKb}KB`);
+    console.log(`  ${relPath}: ${origKb}KB -> zstd: ${zstKb}KB | br: ${brKb}KB | gz: ${gzKb}KB`);
   }
 }
 
 const elapsed = (performance.now() - startTime).toFixed(1);
-console.log(`✓ Optimized build & Brotli compression completed in ${elapsed}ms`);
+console.log(`✓ Optimized build & multi-compression (zstd/br/gz) completed in ${elapsed}ms`);

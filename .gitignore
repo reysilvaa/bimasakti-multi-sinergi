@@ -5,3 +5,4 @@ data/*.sqlite-*
 .env
 views/**/*.br
 views/**/*.gz
+views/**/*.zst
