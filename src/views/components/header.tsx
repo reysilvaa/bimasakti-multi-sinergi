@@ -14,7 +14,7 @@ export function Header({ currentTab }: HeaderProps) {
     subtitle = "Spesifikasi interaktif & live tester endpoint gateway";
   } else if (currentTab === "readme") {
     title = "Panduan & Dokumentasi Proyek";
-    subtitle = "Format render resmi README.md dengan diagram & spesifikasi lengkap";
+    subtitle = "README.md dengan diagram & spesifikasi lengkap";
   }
   return (
     <header className="print:hidden h-16 sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] flex items-center justify-between px-6">
