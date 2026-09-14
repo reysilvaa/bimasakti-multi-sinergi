@@ -1,14 +1,25 @@
-# Sistem Pembayaran Tagihan PDAM (Sidoarjo & Bondowoso)
+# Sistem Pembayaran Tagihan PDAM
 
-Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (PDAM Sidoarjo & PDAM Bondowoso) terintegrasi dengan API Rajabiller Fastpay, sesuai dokumen **Full Stack Dev Test (Rev 2.1.3)** PT. Bimasakti Multi Sinergi.
+> Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (Sidoarjo & Bondowoso) terintegrasi dengan API Rajabiller Fastpay, sesuai dokumen **Full Stack Dev Test (Rev 2.1.3)** PT. Bimasakti Multi Sinergi.
 
-| Layer | Teknologi |
-| :---- | :-------- |
-| Runtime | Node.js `>= 22` + **Express 5** + TypeScript (ESM murni) |
-| Database | **MySQL 8** via Drizzle ORM (`mysql2` pool) + migrasi versioned |
-| Validasi | **Zod** — skema contract = single source of truth semua type domain |
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-339933?logo=nodedotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&logoColor=white)
+![Preact](https://img.shields.io/badge/Preact-10.x-673AB8?logo=preact&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3.x-3E67B1)
+
+---
+
+## Tech Stack
+
+| Layer    | Teknologi                                                             |
+| :------- | :-------------------------------------------------------------------- |
+| Runtime  | Node.js `>= 22` + **Express 5** + TypeScript (ESM murni)              |
+| Database | **MySQL 8** via Drizzle ORM (`mysql2` pool) + migrasi versioned       |
+| Validasi | **Zod** — skema contract = single source of truth semua type domain   |
 | Frontend | **Preact + TSX** + Tailwind (esbuild bundle), UI gaya admin app-shell |
-| Kualitas | Biome (lint/format), `tsc --noEmit`, 9 tes integrasi E2E, knip |
+| Kualitas | Biome (lint/format), `tsc --noEmit`, 9 tes integrasi E2E, knip        |
 
 ---
 
@@ -21,73 +32,81 @@ flowchart LR
     Actor(["👤 Actor"])
 
     subgraph SCOPE["SCOPE TES FULL STACK"]
-        direction LR
-        FEI["FRONT END\nINQUIRY"]
-        FEP["FRONT END\nPAYMENT"]
-        FEH["FRONT END\nHISTORY /\nLAPORAN TRANSAKSI"]
-        API["API INTERNAL"]
-        DB[("DB\nINTERNAL")]
+        FEI["Front End\nInquiry"]
+        FEP["Front End\nPayment"]
+        FEH["Front End\nHistory & Laporan"]
+        API["API Internal"]
+        DB[("DB Internal\nMySQL 8")]
     end
 
-    RAJ_INQ["API INQUIRY\nRAJABILLER"]
-    RAJ_PAY["API PAYMENT\nRAJABILLER"]
+    RAJ_INQ(["API Inquiry\nRajabiller"])
+    RAJ_PAY(["API Payment\nRajabiller"])
 
     Actor --> FEI
     Actor --> FEP
     Actor --> FEH
 
-    FEI <-->|inquiry| API
-    FEP <-->|payment| API
+    FEI -- inquiry --> API
+    API -- hasil tagihan --> FEI
+
+    FEP -- payment --> API
+    API -- struk --> FEP
+
     API --> FEH
 
-    API <--> DB
+    API -- simpan --> DB
+    DB -- riwayat --> API
 
-    API <-->|fastpay.inq| RAJ_INQ
-    API <-->|fastpay.pay| RAJ_PAY
+    API -- fastpay.inq --> RAJ_INQ
+    RAJ_INQ -- respon --> API
+
+    API -- fastpay.pay --> RAJ_PAY
+    RAJ_PAY -- respon --> API
 ```
 
 ### Alur Internal Request
 
-
 ```
-HTTP request
+HTTP Request
    │
-routes/api.routes.ts          deklarasi route
+routes/api.routes.ts          ← deklarasi route
    ▼
-controllers/*.controller.ts   parse + validasi body (zod) → panggil service
+controllers/*.controller.ts   ← parse + validasi body (zod) → panggil service
    ▼
-services/*.service.ts         use case: orkestrasi, aturan bisnis, gateway
+services/*.service.ts         ← use case: orkestrasi, aturan bisnis, gateway
    ▼
-repository/                   satu-satunya layer yang menyentuh MySQL (Drizzle)
+repository/                   ← satu-satunya layer yang menyentuh MySQL (Drizzle)
    ▼
 MySQL (bimasakti_pdam)
 
-error path (satu pintu):
-service throw ApiError(rc, msg, payload?)
-   ▼
-middleware/error.middleware.ts   ApiError.from() → normalisasi → rc dipetakan ke HTTP status
-                                 (01/02/03→400, 04→404, 33→409, 99→500) + envelope spec
+Error path (satu pintu):
+  service throw ApiError(rc, msg, payload?)
+     ▼
+  middleware/error.middleware.ts → rc dipetakan ke HTTP status
+     (01/02/03→400, 04→404, 33→409, 99→500) + envelope spec
 ```
 
-Prinsip yang ditegakkan:
+### Prinsip Desain
 
 - **Contract sekali, di `src/domain/`** — setiap file domain memuat skema Zod + type turunan (`z.infer`) + aturan terkait. Tidak ada shape yang ditulis dua kali.
-- **Controllers tanpa try/catch** — Express 5 meneruskan async rejection ke error middleware global; controller hanya *throw*.
+- **Controllers tanpa try/catch** — Express 5 meneruskan async rejection ke error middleware global; controller hanya _throw_.
 - **Satu gaya error** — semua service melempar `ApiError` (bukan `Object.assign(new Error(...), { rc })`).
 - **`config/` = env saja** — tanpa data domain. Katalog produk tinggal di `domain/product.ts`.
 - **Import ESM eksplisit** — `./foo.js` di file `.ts` (syarat `moduleResolution: NodeNext`).
 
-### Kontrak Domain (`src/domain/`)
+---
 
-| File | Isi | Gaya |
-| :--- | :-- | :--- |
-| `product.ts` | Katalog produk + `pdamProductCodeSchema` + guard — **satu deklarasi katalog, type/schema/guard di-derive** | zod + `as const` |
-| `inquiry.ts` | `specBillSchema`, `inquiryDataSchema`, `inquiryRequestSchema` | zod |
-| `payment.ts` | `paymentRequestSchema` | zod |
-| `transaction.ts` | `transactionRecordSchema` → `TransactionRecord` | zod |
-| `rajabiller.ts` | Wire format request/response upstream (`.passthrough()` untuk field dinamis) | zod |
-| `protocol.ts` | `RC` (kode bisnis spec) + `envelopeSchema` + builder `envelope()` | zod + `as const` |
-| `errors.ts` | `ApiError` + normalizer `ApiError.from()` | class |
+## Kontrak Domain (`src/domain/`)
+
+| File             | Isi                                                                                                        | Gaya             |
+| :--------------- | :--------------------------------------------------------------------------------------------------------- | :--------------- |
+| `product.ts`     | Katalog produk + `pdamProductCodeSchema` + guard — **satu deklarasi katalog, type/schema/guard di-derive** | zod + `as const` |
+| `inquiry.ts`     | `specBillSchema`, `inquiryDataSchema`, `inquiryRequestSchema`                                              | zod              |
+| `payment.ts`     | `paymentRequestSchema`                                                                                     | zod              |
+| `transaction.ts` | `transactionRecordSchema` → `TransactionRecord`                                                            | zod              |
+| `rajabiller.ts`  | Wire format request/response upstream (`.passthrough()` untuk field dinamis)                               | zod              |
+| `protocol.ts`    | `RC` (kode bisnis spec) + `envelopeSchema` + builder `envelope()`                                          | zod + `as const` |
+| `errors.ts`      | `ApiError` + normalizer `ApiError.from()`                                                                  | class            |
 
 ### Idempotensi Pembayaran
 
@@ -106,10 +125,10 @@ Prinsip yang ditegakkan:
 
 ## List Produk Test (spec)
 
-| Produk          | Kode Produk | Idpel      |
-| :-------------- | :---------- | :--------- |
-| PDAM SIDOARJO   | `WASDA`     | `01002676` |
-| PDAM BONDOWOSO  | `WABONDO`   | `09000879` |
+| Produk         | Kode Produk | Idpel      |
+| :------------- | :---------- | :--------- |
+| PDAM SIDOARJO  | `WASDA`     | `01002676` |
+| PDAM BONDOWOSO | `WABONDO`   | `09000879` |
 
 Tombol pintasan Test IDPEL tersedia di UI (terisi otomatis dari `GET /api/products`).
 
@@ -133,7 +152,13 @@ Contoh respon inquiry (WASDA):
     "total_bayar": 305306,
     "jumlah_bulan": "6",
     "data_bill": {
-      "blth1": { "air": 40500, "denda": 7500, "nonair": 0, "meter_awal": 0, "meter_akhir": 0, "bulan": "5", "tahun": "2024" },
+      "blth1": {
+        "air": 40500,
+        "denda": 7500,
+        "nonair": 0,
+        "bulan": "5",
+        "tahun": "2024"
+      },
       "blth2": { "...": "loop sejumlah billquantity dari respon inq/pay" }
     },
     "ref1": "INQ_...",
@@ -144,15 +169,15 @@ Contoh respon inquiry (WASDA):
 
 ## Endpoint API Internal
 
-| Endpoint                                  | Fungsi                                                        |
-| :---------------------------------------- | :------------------------------------------------------------ |
-| `GET /api/products`                       | Daftar produk + idpel sample                                   |
-| `POST /api/inquiry`                       | `{ productCode, customerId }` → data tagihan (format di atas)  |
-| `POST /api/payment`                       | `{ productCode, customerId, ref1, ref2, nominal }` → simpan DB + struk |
-| `GET /api/transactions?limit=100`         | Riwayat transaksi (max 500)                                    |
-| `GET /api/transactions/:id`               | Detail transaksi + teks struk                                  |
-| `GET /api/transactions/:id/receipt`       | Unduh struk `.txt` (attachment)                                |
-| `GET /api/readme`                         | Isi README.md (untuk tab "Panduan & README" di UI)             |
+| Endpoint                            | Fungsi                                                                 |
+| :---------------------------------- | :--------------------------------------------------------------------- |
+| `GET /api/products`                 | Daftar produk + idpel sample                                           |
+| `POST /api/inquiry`                 | `{ productCode, customerId }` → data tagihan                           |
+| `POST /api/payment`                 | `{ productCode, customerId, ref1, ref2, nominal }` → simpan DB + struk |
+| `GET /api/transactions?limit=100`   | Riwayat transaksi (max 500)                                            |
+| `GET /api/transactions/:id`         | Detail transaksi + teks struk                                          |
+| `GET /api/transactions/:id/receipt` | Unduh struk `.txt` (attachment)                                        |
+| `GET /api/readme`                   | Isi README.md (untuk tab "Panduan & README" di UI)                     |
 
 ## Struk (spec point 8)
 
@@ -209,7 +234,7 @@ npm run build        # db:migrate menjalankan dist/scripts/migrate.js
 npm run db:migrate
 ```
 
-*(Database + tabel `transactions` + `__drizzle_migrations` dibuat otomatis bila belum ada. Untuk iterasi cepat tanpa build: `npx tsx src/scripts/migrate.ts`.)*
+_(Database + tabel `transactions` + `__drizzle_migrations` dibuat otomatis bila belum ada. Untuk iterasi cepat tanpa build: `npx tsx src/scripts/migrate.ts`.)_
 
 ### 5. Menjalankan Aplikasi
 
@@ -236,6 +261,7 @@ npm start
 
 Akses aplikasi di browser: **http://localhost:3000**
 
+---
 
 ## Pengujian & Kualitas Kode
 
@@ -270,52 +296,50 @@ Cakupan 9 tes: daftar produk → validasi inquiry (envelope rc/ket) → inquiry 
 │   ├── config/
 │   │   ├── constants.ts                # Env constants saja (PORT, DB_*, NODE_ENV)
 │   │   └── rajabiller.ts               # Kredensial gateway Rajabiller
-│   ├── controllers/                    # HTTP adapters: parse → validasi zod → service (tanpa try/catch)
+│   ├── controllers/                    # HTTP adapters: parse → validasi zod → service
 │   │   ├── inquiry.controller.ts
 │   │   ├── payment.controller.ts
 │   │   └── history.controller.ts
 │   ├── domain/                         # Contract = zod schema + type turunan + aturan domain
-│   │   ├── product.ts                  #   katalog produk, enum schema, guard
-│   │   ├── inquiry.ts                  #   skema tagihan & inquiry
-│   │   ├── payment.ts                  #   skema request pembayaran
-│   │   ├── transaction.ts              #   entitas transaksi tersimpan
-│   │   ├── rajabiller.ts               #   wire format upstream
-│   │   ├── protocol.ts                 #   RC + envelope spec point 4
-│   │   └── errors.ts                   #   ApiError + normalizer from()
+│   │   ├── product.ts
+│   │   ├── inquiry.ts
+│   │   ├── payment.ts
+│   │   ├── transaction.ts
+│   │   ├── rajabiller.ts
+│   │   ├── protocol.ts
+│   │   └── errors.ts
 │   ├── middleware/
 │   │   ├── error.middleware.ts         # Funnel error global: rc → HTTP status + envelope
 │   │   └── static.middleware.ts        # Negosiasi kompresi zstd/br/gz
 │   ├── repository/                     # Satu-satunya layer yang menyentuh MySQL
-│   │   ├── connection.ts               #   Pool mysql2 + instance Drizzle
-│   │   ├── schema.ts                   #   Definisi tabel Drizzle
+│   │   ├── connection.ts
+│   │   ├── schema.ts
 │   │   └── transaction.repository.ts
 │   ├── routes/
-│   │   └── api.routes.ts               # Deklarasi route /api/*
+│   │   └── api.routes.ts
 │   ├── scripts/
-│   │   └── migrate.ts                  # Runner migrasi (auto-create database)
-│   ├── services/                       # Use case & integrasi eksternal
+│   │   └── migrate.ts
+│   ├── services/
 │   │   ├── inquiry.service.ts
-│   │   ├── payment.service.ts          #   Idempotensi (pre-check + UNIQUE ref2)
+│   │   ├── payment.service.ts          # Idempotensi (pre-check + UNIQUE ref2)
 │   │   ├── history.service.ts
-│   │   ├── rajabiller.service.ts       #   Client JSON API Rajabiller
-│   │   └── receipt.service.ts          #   Formatter struk plain-text (2 layout)
-│   ├── utils/                          # Helper pure, bebas framework
-│   │   ├── helpers.ts                  #   toInt()
-│   │   └── terbilang.ts                #   angka → kata
+│   │   ├── rajabiller.service.ts
+│   │   └── receipt.service.ts          # Formatter struk plain-text (2 layout)
+│   ├── utils/
+│   │   ├── helpers.ts
+│   │   └── terbilang.ts
 │   └── views/                          # Frontend Preact TSX (admin app-shell)
-│       ├── main.tsx                    #   Entry render
-│       ├── app.tsx                     #   Shell: sidebar, topbar, tab, state
+│       ├── main.tsx
+│       ├── app.tsx
 │       ├── utils.ts
 │       ├── api/
-│       │   └── pdam.api.ts             #   Fetcher layer frontend
-│       └── components/                 #   inquiry.form, inquiry.result, payment.confirm.modal,
-│           │                           #   receipt.modal, history.table, flow.stepper, api.docs,
-│           │                           #   readme.viewer, sidebar, toast, header
-│           └── ui/                     #   Primitif UI reusable
-├── views/                              # Static host: index.html, css/, js/ (hasil bundle), kompresi .zst/.br/.gz
+│       │   └── pdam.api.ts
+│       └── components/
+│           └── ui/
+├── views/                              # Static host: index.html, css/, js/ + kompresi
 ├── test_integration.mjs                # 9 tes integrasi E2E
-├── drizzle.config.ts                   # Konfigurasi drizzle-kit
-├── vercel.json                         # Konfigurasi deploy Vercel
+├── drizzle.config.ts
+├── vercel.json
 └── package.json
 ```
 

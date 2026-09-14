@@ -8,8 +8,6 @@ interface TocItem {
   level: number;
 }
 
-// ── Marked custom renderer ────────────────────────────────────────────────────
-
 function buildRenderer(): Partial<Renderer> {
   const toId = (text: string) =>
     text
@@ -128,6 +126,7 @@ export function ReadmeViewer({
   const [content, setContent] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [mermaidReady, setMermaidReady] = useState(false);
 
   // Fetch README from API
   useEffect(() => {
@@ -141,7 +140,14 @@ export function ReadmeViewer({
 
   // Load Mermaid.js once from CDN
   useEffect(() => {
-    if (document.getElementById("mermaid-cdn")) return;
+    const existing = document.getElementById("mermaid-cdn");
+    if (existing) {
+      // Already appended — might already be loaded
+      const w = window as unknown as { mermaid?: { initialize: (c: object) => void } };
+      if (w.mermaid) setMermaidReady(true);
+      else existing.addEventListener("load", () => setMermaidReady(true));
+      return;
+    }
     const s = document.createElement("script");
     s.id = "mermaid-cdn";
     s.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
@@ -151,6 +157,7 @@ export function ReadmeViewer({
         theme: "neutral",
         flowchart: { curve: "basis" },
       });
+      setMermaidReady(true);
     };
     document.head.appendChild(s);
   }, []);
@@ -202,15 +209,19 @@ export function ReadmeViewer({
     };
   }, []);
 
-  // Trigger mermaid.run() after HTML is injected
+  // Trigger mermaid.run() after HTML injected AND CDN ready
   useEffect(() => {
-    const w = window as unknown as { mermaid?: { run: (o: object) => Promise<void> } };
-    if (!w.mermaid || !renderedHtml) return;
-    const nodes = Array.from(document.querySelectorAll(".readme-prose .mermaid"));
-    if (!nodes.length) return;
-    nodes.forEach((n) => n.removeAttribute("data-processed"));
-    w.mermaid.run({ nodes });
-  }, [renderedHtml]);
+    if (!mermaidReady || !renderedHtml) return;
+    const tid = setTimeout(() => {
+      const w = window as unknown as { mermaid?: { run: (o: object) => Promise<void> } };
+      if (!w.mermaid) return;
+      const nodes = Array.from(document.querySelectorAll(".readme-prose .mermaid"));
+      if (!nodes.length) return;
+      nodes.forEach((n) => n.removeAttribute("data-processed"));
+      w.mermaid.run({ nodes }).catch(() => {});
+    }, 80);
+    return () => clearTimeout(tid);
+  }, [renderedHtml, mermaidReady]);
 
   return (
     <div className="space-y-6">
