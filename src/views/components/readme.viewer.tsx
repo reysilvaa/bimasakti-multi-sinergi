@@ -1,125 +1,6 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { Button, Card } from "@/views/components/ui/index.js";
 
-const DEFAULT_README = `# Sistem Pembayaran Tagihan PDAM (Sidoarjo & Bondowoso)
-
-Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (PDAM Sidoarjo & PDAM Bondowoso) terintegrasi dengan API Rajabiller Fastpay, sesuai dokumen **Full Stack Dev Test (Rev 2.1.3)** PT. Bimasakti Multi Sinergi.
-
-Dibangun menggunakan arsitektur modern: **Node.js + Express + TypeScript (ESM)**, MySQL via **Drizzle ORM** (\`mysql2\` pool), frontend Preact + Tailwind CSS + Vite/esbuild bundle dengan multi-tier compression (Zstandard, Brotli, Gzip).
-
----
-
-## Fitur Utama
-
-- **Inquiry & Cek Tagihan Real-Time**: Terhubung langsung ke API Biller PDAM (Rajabiller Fastpay) untuk verifikasi nomor pelanggan & nominal tagihan.
-- **Konfirmasi Pembayaran**: Dialog konfirmasi sebelum pembayaran diproses untuk memvalidasi identitas pelanggan dan total tagihan.
-- **Eksekusi Pembayaran & Idempotensi**: Mencegah klik ganda dan pembayaran duplikat berbasis kunci idempotensi unik per sesi transaksi.
-- **Cetak & Unduh Struk Resmi**: Tampilan struk kasir termal presisi dengan fitur Cetak Instan (isolated print frame) dan Unduh file teks (\`.txt\`).
-- **Riwayat Transaksi Lengkap**: Pencarian multi-kriteria berdasarkan ID Pelanggan, Nama, atau Nomor Resi dengan filter wilayah PDAM.
-- **Interactive Scalar-style API Docs**: Dokumentasi API interaktif dengan request tester, cuplikan kode cURL/JavaScript, dan referensi Response Code (RC).
-- **Performa Ekstrem**: Kompresi statis otomatis multi-tier (Zstd level 19, Brotli level 11, Gzip level 9) dengan negosiasi header otomatis.
-
----
-
-## Alur Transaksi (Sesuai Spesifikasi)
-
-1. Pengguna memilih **Wilayah PDAM** dan memasukkan **Nomor ID Pelanggan (idpel)**.
-2. Frontend memanggil API Internal \`POST /api/inquiry\` → Gateway meneruskan ke Rajabiller \`fastpay.inq\`.
-3. Rincian tagihan (nama, periode, nominal air, denda, admin, total bayar) ditampilkan di antarmuka.
-4. Pengguna menekan tombol **Bayar Sekarang**, sistem memunculkan dialog konfirmasi.
-5. Setelah dikonfirmasi, Frontend memanggil \`POST /api/payment\` → Gateway meneruskan ke Rajabiller \`fastpay.pay\`.
-6. Transaksi sukses disimpan secara permanen ke database internal MySQL menggunakan Drizzle ORM.
-7. Modal struk pembayaran terbuka secara otomatis dan riwayat transaksi diperbarui seketika.
-
----
-
-## Daftar Produk & ID Pelanggan Contoh
-
-| Nama Wilayah PDAM | Kode Produk | ID Pelanggan Contoh |
-|:---|:---:|:---:|
-| PDAM KAB. SIDOARJO | \`WASDA\` | \`01002676\` |
-| PDAM KAB. BONDOWOSO | \`WABONDO\` | \`09000879\` |
-
----
-
-## Spesifikasi Endpoint API Internal
-
-Semua response API dibungkus dalam format standar envelope:
-
-\`\`\`json
-{
-  "rc": "00",
-  "ket": "sukses",
-  "data": { ... }
-}
-\`\`\`
-
-| Method | Endpoint | Deskripsi |
-|:---|:---|:---|
-| \`GET\` | \`/api/products\` | Mengambil daftar wilayah PDAM beserta sample IDPEL |
-| \`POST\` | \`/api/inquiry\` | Cek tagihan pelanggan (\`productCode\`, \`customerId\`) |
-| \`POST\` | \`/api/payment\` | Eksekusi bayar tagihan (\`productCode\`, \`customerId\`, \`ref1\`, \`ref2\`, \`nominal\`) |
-| \`GET\` | \`/api/transactions\` | Riwayat transaksi tersimpan di database internal |
-| \`GET\` | \`/api/transactions/:id\` | Detail transaksi spesifik & teks format struk kasir |
-| \`GET\` | \`/api/transactions/:id/receipt\` | Unduh struk kasir fisik sebagai file \`.txt\` |
-| \`GET\` | \`/api/readme\` | Mengambil isi dokumentasi README ini dalam format Markdown |
-
----
-
-## Proteksi & Keamanan Transaksi
-
-1. **Idempotency Key Verification**: Mencegah request ganda dari jaringan tidak stabil atau klik berulang dari user menggunakan verifikasi parameter \`ref2\`.
-2. **Exponential Backoff Database Retry**: Koneksi database MySQL otomatis melakukan retry dengan backoff eksponensial jika terjadi socket drop sementara.
-3. **Strict Boundary Validation**: Setiap payload masuk divalidasi ketat di layer controller menggunakan skema Zod sebelum diproses ke layer service.
-4. **Isolated Receipt Printing**: Pencetakan struk menggunakan iframe terisolasi untuk memastikan tampilan struk kasir presisi tanpa merusak halaman utama.
-
----
-
-## Panduan Instalasi & Menjalankan Lokal
-
-### 1. Clone & Instalasi Dependensi
-\`\`\`bash
-git clone <url-repository>
-cd bimasakti-multi-sinergi
-npm install
-\`\`\`
-
-### 2. Konfigurasi Lingkungan (.env)
-Salin file template lingkungan:
-\`\`\`bash
-cp .env.example .env
-\`\`\`
-Isi kredensial database MySQL dan kredensial Rajabiller:
-\`\`\`ini
-PORT=3000
-NODE_ENV=development
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=bimasakti_pdam
-RAJABILLER_URL=https://c-dev-partnerlink.rajabiller.com/json/index.php
-RAJABILLER_UID=SP300203
-RAJABILLER_PIN=311575
-\`\`\`
-
-### 3. Migrasi Database
-\`\`\`bash
-npm run db:migrate
-\`\`\`
-
-### 4. Menjalankan Server
-\`\`\`bash
-# Mode Development (Auto-Reload)
-npm run dev
-
-# Mode Production Build
-npm run build
-npm start
-\`\`\`
-Akses aplikasi melalui browser di \`http://localhost:3000\`.
-`;
-
 interface TocItem {
   id: string;
   text: string;
@@ -131,7 +12,7 @@ export function ReadmeViewer({
 }: {
   onNavigateToApp?: () => void;
 }) {
-  const [content, setContent] = useState<string>(DEFAULT_README);
+  const [content, setContent] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
