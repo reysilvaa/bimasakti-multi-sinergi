@@ -313,8 +313,7 @@ Cakupan 9 tes: daftar produk → validasi inquiry (envelope rc/ket) → inquiry 
 │           ├── history.table.tsx
 │           ├── receipt.modal.tsx
 │           └── ...
-├── views/                              # Static host: index.html, css/, js/ + kompresi (zst/br/gz)
-├── image.png                           # Diagram Sistem arsitektur (dokumen spec Bimasakti)
+├── views/                              # Static host: index.html, css/, js/, images/ + kompresi (zst/br/gz)
 ├── test_integration.mjs                # 9 tes integrasi E2E
 ├── drizzle.config.ts
 ├── vercel.json
