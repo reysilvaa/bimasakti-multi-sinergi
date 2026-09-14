@@ -1,8 +1,9 @@
+import 'dotenv/config';
 import assert from 'node:assert';
 import http from 'node:http';
 
 process.env.NODE_ENV = "test";
-process.env.DB_NAME = process.env.DB_TEST_NAME || 'bimasakti_pdam_test';
+process.env.DB_NAME = process.env.DB_TEST_NAME || process.env.DB_NAME || 'freedb_Sjwsj1v9';
 
 const { default: app } = await import('./dist/server.js');
 const { runMigrations } = await import('./dist/scripts/migrate.js');
