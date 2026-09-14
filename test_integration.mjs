@@ -19,9 +19,13 @@ const mysql = await import('mysql2/promise');
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME,
   });
-  await conn.execute('SET FOREIGN_KEY_CHECKS = 0');
-  await conn.execute('TRUNCATE TABLE transactions');
-  await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
+  if (process.env.DB_NAME && process.env.DB_NAME.includes('test')) {
+    await conn.execute('SET FOREIGN_KEY_CHECKS = 0');
+    await conn.execute('TRUNCATE TABLE transactions');
+    await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
+  } else {
+    await conn.execute("DELETE FROM transactions WHERE ref1 LIKE 'TEST_%' OR ref2 IN ('2818948501', '2818948503')");
+  }
   await conn.end();
 }
 
