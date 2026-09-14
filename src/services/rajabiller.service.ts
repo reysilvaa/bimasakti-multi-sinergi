@@ -19,7 +19,7 @@ function toInquiryData(
   const bills = extractBills(raw);
   const nominal = toInt(raw.nominal);
   const admin = toInt(raw.biayaadmin);
-  const nomet = raw.nometer || "";
+  const nomet = raw.nometer || raw.customerid2 || "";
 
   return {
     idpel: raw.customerid1 || raw.idpelanggan1 || "",

@@ -29,6 +29,9 @@ const rajabillerResponseSchema = z
     noref2: z.string().optional(),
     customername: z.string().optional(),
     customeraddress: z.string().optional(),
+    customerid1: z.string().optional(),
+    customerid2: z.string().optional(),
+    customerid3: z.string().optional(),
     nometer: z.string().optional(),
   })
   .passthrough();
