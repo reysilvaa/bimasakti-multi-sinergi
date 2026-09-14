@@ -23,7 +23,6 @@ CREATE TABLE `transactions` (
 	CONSTRAINT `transactions_id` PRIMARY KEY(`id`),
 	CONSTRAINT `uq_tx_ref2` UNIQUE(`ref2`)
 );
---> statement-breakpoint
-CREATE INDEX `idx_tx_customer_id` ON `transactions` (`customer_id`);--> statement-breakpoint
-CREATE INDEX `idx_tx_ref1` ON `transactions` (`ref1`);--> statement-breakpoint
+CREATE INDEX `idx_tx_customer_id` ON `transactions` (`customer_id`);
+CREATE INDEX `idx_tx_ref1` ON `transactions` (`ref1`);
 CREATE INDEX `idx_tx_created_at` ON `transactions` (`created_at`);

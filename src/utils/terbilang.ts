@@ -1,6 +1,3 @@
-/**
- * Convert numerical amounts into standard Indonesian words (Terbilang).
- */
 const UNITS = [
   "",
   "SATU",
@@ -60,8 +57,6 @@ function convertNumberToWords(n: number): string {
 
 export function terbilang(amount: number): string {
   if (amount === 0) return "NOL RUPIAH";
-  const words = convertNumberToWords(amount)
-    .replace(/\s+/g, " ")
-    .trim();
+  const words = convertNumberToWords(amount).replace(/\s+/g, " ").trim();
   return `${words} RUPIAH`;
 }

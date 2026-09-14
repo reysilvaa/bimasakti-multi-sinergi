@@ -2,16 +2,13 @@ import assert from 'node:assert';
 import http from 'node:http';
 
 process.env.NODE_ENV = "test";
-// Isolated MySQL test database (created on the fly by runMigrations).
 process.env.DB_NAME = process.env.DB_TEST_NAME || 'bimasakti_pdam_test';
 
 const { default: app } = await import('./dist/server.js');
 const { runMigrations } = await import('./dist/scripts/migrate.js');
 
-// Ensure schema exists in the test DB (idempotent).
 await runMigrations();
 
-// Start from a clean slate: wipe rows between runs.
 const mysql = await import('mysql2/promise');
 {
   const conn = await mysql.createConnection({
@@ -180,7 +177,6 @@ async function runTests() {
     console.log('\n=== ALL 8 INTEGRATION TESTS PASSED ===');
   } finally {
     server.close();
-    // mysql2 pool keeps the event loop alive; exit explicitly.
     process.exit(0);
   }
 }

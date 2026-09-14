@@ -9,6 +9,10 @@
     "build:client": "esbuild src/views/app.ts --bundle --outfile=views/js/app.js --format=iife --target=es2020",
     "build": "npm run clean:dist && npm run build:client && npm run build:server",
     "clean:dist": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "format": "biome format --write src",
+    "decomment": "node scripts/strip-comments.mjs src",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node dist/scripts/migrate.js",
     "start": "node dist/server.js",
@@ -20,12 +24,15 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
-    "mysql2": "^3.24.4"
+    "mysql2": "^3.24.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.5.1",
+    "decomment": "^0.9.5",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.2",
     "tsx": "^4.23.13",

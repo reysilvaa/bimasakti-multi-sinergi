@@ -1,15 +1,29 @@
-import { TransactionRecord, SpecBill, PdamProductCode, RajabillerRawResponse } from "../models/transaction.js";
-import { SUPPORTED_PRODUCTS } from "../config/constants.js";
-import { terbilang } from "../utils/terbilang.js";
+import type { SpecBill } from "../domain/inquiry.js";
+import { SUPPORTED_PRODUCTS } from "../domain/product.js";
+import type { RajabillerRawResponse } from "../domain/rajabiller.js";
+import { type TransactionRecord } from "../domain/transaction.js";
 import { toInt } from "../utils/helpers.js";
+import { terbilang } from "../utils/terbilang.js";
 
 const MONTH_NAMES = [
-  "JAN", "FEB", "MAR", "APR", "MEI", "JUN",
-  "JUL", "AGS", "SEP", "OKT", "NOV", "DES"
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MEI",
+  "JUN",
+  "JUL",
+  "AGS",
+  "SEP",
+  "OKT",
+  "NOV",
+  "DES",
 ];
 
-/** Raw Rajabiller period fields -> one spec bill (spec point 4 `data_bill`). */
-export function toSpecBill(raw: RajabillerRawResponse, i: number): SpecBill | null {
+export function toSpecBill(
+  raw: RajabillerRawResponse,
+  i: number,
+): SpecBill | null {
   const bulan = (raw[`monthperiod${i}`] || "").trim();
   const tahunRaw = (raw[`yearperiod${i}`] || "").trim();
   const airStr = (raw[`billamount${i}`] || "").trim();
@@ -41,7 +55,6 @@ export function extractBills(raw: RajabillerRawResponse): SpecBill[] {
   return bills;
 }
 
-/** "20241203101530" (raw.waktu) -> "03-12-2024 10:15:30"; falls back to now (local time). */
 export function formatReceiptDate(rawWaktu?: string): string {
   if (!rawWaktu || rawWaktu.length < 14) {
     const d = new Date();
@@ -51,10 +64,8 @@ export function formatReceiptDate(rawWaktu?: string): string {
   return `${rawWaktu.slice(6, 8)}-${rawWaktu.slice(4, 6)}-${rawWaktu.slice(0, 4)} ${rawWaktu.slice(8, 10)}:${rawWaktu.slice(10, 12)}:${rawWaktu.slice(12, 14)}`;
 }
 
-/** 40500 -> "40.500" (spec struk format). */
 const dot = (n: number): string => n.toLocaleString("id-ID");
 
-/** Spec bill -> struk period label, e.g. "AGS2014". */
 export function periodLabel(b: SpecBill): string {
   const idx = toInt(b.bulan) - 1;
   return `${MONTH_NAMES[idx] || b.bulan}${b.tahun}`;
@@ -67,10 +78,12 @@ export function generateReceiptText(tx: TransactionRecord): string {
   } catch {}
 
   const bills = raw ? extractBills(raw) : [];
-  const pdamName = tx.pdamName || SUPPORTED_PRODUCTS[tx.productCode]?.name || "PDAM";
-  const billLines = bills.length > 0
-    ? bills.map((b) => ` ${periodLabel(b)} :Rp ${dot(b.air)}`)
-    : [` BULAN 1 :Rp ${dot(tx.nominal)}`];
+  const pdamName =
+    tx.pdamName || SUPPORTED_PRODUCTS[tx.productCode]?.name || "PDAM";
+  const billLines =
+    bills.length > 0
+      ? bills.map((b) => ` ${periodLabel(b)} :Rp ${dot(b.air)}`)
+      : [` BULAN 1 :Rp ${dot(tx.nominal)}`];
 
   const lines: string[] = [
     `STRUK PEMBAYARAN ${pdamName}`,

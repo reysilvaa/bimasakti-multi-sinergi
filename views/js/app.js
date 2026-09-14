@@ -71,7 +71,6 @@
     constructor() {
       __publicField(this, "currentInquiry", null);
       __publicField(this, "allTransactions", []);
-      // DOM Elements
       __publicField(this, "formInquiry");
       __publicField(this, "productSelect");
       __publicField(this, "customerIdInput");
@@ -108,37 +107,84 @@
       this.loadTransactionHistory();
     }
     cacheDomElements() {
-      this.formInquiry = document.getElementById("form-inquiry");
-      this.productSelect = document.getElementById("product-select");
-      this.customerIdInput = document.getElementById("customer-id-input");
-      this.btnSubmitInquiry = document.getElementById("btn-submit-inquiry");
-      this.btnProceedPayment = document.getElementById("btn-proceed-payment");
-      this.btnCancelInquiry = document.getElementById("btn-cancel-inquiry");
-      this.emptyStateEl = document.getElementById("inquiry-empty-state");
-      this.loadingStateEl = document.getElementById("inquiry-loading-state");
-      this.resultCardEl = document.getElementById("inquiry-result-card");
+      this.formInquiry = document.getElementById(
+        "form-inquiry"
+      );
+      this.productSelect = document.getElementById(
+        "product-select"
+      );
+      this.customerIdInput = document.getElementById(
+        "customer-id-input"
+      );
+      this.btnSubmitInquiry = document.getElementById(
+        "btn-submit-inquiry"
+      );
+      this.btnProceedPayment = document.getElementById(
+        "btn-proceed-payment"
+      );
+      this.btnCancelInquiry = document.getElementById(
+        "btn-cancel-inquiry"
+      );
+      this.emptyStateEl = document.getElementById(
+        "inquiry-empty-state"
+      );
+      this.loadingStateEl = document.getElementById(
+        "inquiry-loading-state"
+      );
+      this.resultCardEl = document.getElementById(
+        "inquiry-result-card"
+      );
       this.alertBanner = document.getElementById("alert-banner");
       this.alertIcon = document.getElementById("alert-icon");
       this.alertTitle = document.getElementById("alert-title");
       this.alertDesc = document.getElementById("alert-desc");
-      this.alertCloseBtn = document.getElementById("alert-close-btn");
-      this.navInquiryBtn = document.getElementById("nav-inquiry-btn");
-      this.navHistoryBtn = document.getElementById("nav-history-btn");
-      this.sectionPayment = document.getElementById("section-payment");
-      this.sectionHistory = document.getElementById("section-history");
+      this.alertCloseBtn = document.getElementById(
+        "alert-close-btn"
+      );
+      this.navInquiryBtn = document.getElementById(
+        "nav-inquiry-btn"
+      );
+      this.navHistoryBtn = document.getElementById(
+        "nav-history-btn"
+      );
+      this.sectionPayment = document.getElementById(
+        "section-payment"
+      );
+      this.sectionHistory = document.getElementById(
+        "section-history"
+      );
       this.historyTbody = document.getElementById("history-tbody");
-      this.historyEmptyRow = document.getElementById("history-empty-row");
-      this.historyCountBadge = document.getElementById("history-count-badge");
-      this.historySearchInput = document.getElementById("history-search-input");
-      this.btnRefreshHistory = document.getElementById("btn-refresh-history");
+      this.historyEmptyRow = document.getElementById(
+        "history-empty-row"
+      );
+      this.historyCountBadge = document.getElementById(
+        "history-count-badge"
+      );
+      this.historySearchInput = document.getElementById(
+        "history-search-input"
+      );
+      this.btnRefreshHistory = document.getElementById(
+        "btn-refresh-history"
+      );
       this.receiptModal = document.getElementById("receipt-modal");
-      this.modalReceiptContent = document.getElementById("modal-receipt-content");
-      this.btnCloseReceiptModal = document.getElementById("btn-close-receipt-modal");
-      this.btnPrintReceipt = document.getElementById("btn-print-receipt");
-      this.btnDownloadReceipt = document.getElementById("btn-download-receipt");
+      this.modalReceiptContent = document.getElementById(
+        "modal-receipt-content"
+      );
+      this.btnCloseReceiptModal = document.getElementById(
+        "btn-close-receipt-modal"
+      );
+      this.btnPrintReceipt = document.getElementById(
+        "btn-print-receipt"
+      );
+      this.btnDownloadReceipt = document.getElementById(
+        "btn-download-receipt"
+      );
     }
     bindEvents() {
-      this.navInquiryBtn.addEventListener("click", () => this.switchTab("inquiry"));
+      this.navInquiryBtn.addEventListener(
+        "click",
+        () => this.switchTab("inquiry")
+      );
       this.navHistoryBtn.addEventListener("click", () => {
         this.switchTab("history");
         this.loadTransactionHistory();
@@ -147,14 +193,26 @@
         e.preventDefault();
         this.handleInquirySubmit();
       });
-      this.btnCancelInquiry.addEventListener("click", () => this.resetInquiryView());
-      this.btnProceedPayment.addEventListener("click", () => this.handlePaymentSubmit());
+      this.btnCancelInquiry.addEventListener(
+        "click",
+        () => this.resetInquiryView()
+      );
+      this.btnProceedPayment.addEventListener(
+        "click",
+        () => this.handlePaymentSubmit()
+      );
       this.historySearchInput.addEventListener("input", () => {
         this.filterTransactions(this.historySearchInput.value);
       });
-      this.btnRefreshHistory.addEventListener("click", () => this.loadTransactionHistory());
+      this.btnRefreshHistory.addEventListener(
+        "click",
+        () => this.loadTransactionHistory()
+      );
       this.alertCloseBtn.addEventListener("click", () => this.hideAlert());
-      this.btnCloseReceiptModal.addEventListener("click", () => this.closeReceiptModal());
+      this.btnCloseReceiptModal.addEventListener(
+        "click",
+        () => this.closeReceiptModal()
+      );
       this.receiptModal.addEventListener("click", (e) => {
         if (e.target === this.receiptModal) this.closeReceiptModal();
       });
@@ -165,7 +223,6 @@
       });
       this.btnPrintReceipt.addEventListener("click", () => window.print());
     }
-    /** Fill product select + preset buttons from /api/products (single source of truth). */
     async loadPresets() {
       try {
         const res = await fetch("/api/products");
@@ -205,11 +262,31 @@
       this.navHistoryBtn.className = isInquiry ? inactiveClass : activeClass;
     }
     showAlert(type, title, message) {
-      this.alertBanner.classList.remove("hidden", "bg-emerald-50", "border-emerald-200", "text-emerald-900", "bg-red-50", "border-red-200", "text-red-900", "bg-blue-50", "border-blue-200", "text-blue-900");
+      this.alertBanner.classList.remove(
+        "hidden",
+        "bg-emerald-50",
+        "border-emerald-200",
+        "text-emerald-900",
+        "bg-red-50",
+        "border-red-200",
+        "text-red-900",
+        "bg-blue-50",
+        "border-blue-200",
+        "text-blue-900"
+      );
       const config = {
-        success: { cls: ["bg-emerald-50", "border-emerald-200", "text-emerald-900"], icon: "fa-circle-check text-emerald-600" },
-        error: { cls: ["bg-red-50", "border-red-200", "text-red-900"], icon: "fa-circle-exclamation text-red-600" },
-        info: { cls: ["bg-blue-50", "border-blue-200", "text-blue-900"], icon: "fa-circle-info text-blue-600" }
+        success: {
+          cls: ["bg-emerald-50", "border-emerald-200", "text-emerald-900"],
+          icon: "fa-circle-check text-emerald-600"
+        },
+        error: {
+          cls: ["bg-red-50", "border-red-200", "text-red-900"],
+          icon: "fa-circle-exclamation text-red-600"
+        },
+        info: {
+          cls: ["bg-blue-50", "border-blue-200", "text-blue-900"],
+          icon: "fa-circle-info text-blue-600"
+        }
       }[type];
       this.alertBanner.classList.add(...config.cls);
       this.alertIcon.innerHTML = `<i class="fa-solid ${config.icon}"></i>`;
@@ -239,7 +316,11 @@
       const productCode = this.productSelect.value;
       const customerId = this.customerIdInput.value.trim();
       if (!customerId) {
-        this.showAlert("error", "Validasi Gagal", "Nomor ID Pelanggan wajib diisi.");
+        this.showAlert(
+          "error",
+          "Validasi Gagal",
+          "Nomor ID Pelanggan wajib diisi."
+        );
         return;
       }
       this.setInquiryLoading(true);
@@ -255,10 +336,18 @@
         }
         this.currentInquiry = json.data;
         this.displayInquiryResult(this.currentInquiry);
-        this.showAlert("success", "Inquiry Berhasil", `Data tagihan untuk ${this.currentInquiry.nama} ditemukan.`);
+        this.showAlert(
+          "success",
+          "Inquiry Berhasil",
+          `Data tagihan untuk ${this.currentInquiry.nama} ditemukan.`
+        );
       } catch (err) {
         this.resetInquiryView();
-        this.showAlert("error", "Inquiry Gagal", err.message || "Terjadi kesalahan jaringan.");
+        this.showAlert(
+          "error",
+          "Inquiry Gagal",
+          err.message || "Terjadi kesalahan jaringan."
+        );
       } finally {
         this.setInquiryLoading(false);
       }
@@ -289,7 +378,20 @@
         tr.className = "hover:bg-slate-50/80 transition-colors";
         const meter = bill.meterAkhir - bill.meterAwal;
         const monthIdx = parseInt(bill.bulan, 10) - 1;
-        const MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGS", "SEP", "OKT", "NOV", "DES"];
+        const MONTHS = [
+          "JAN",
+          "FEB",
+          "MAR",
+          "APR",
+          "MEI",
+          "JUN",
+          "JUL",
+          "AGS",
+          "SEP",
+          "OKT",
+          "NOV",
+          "DES"
+        ];
         const label = `${MONTHS[monthIdx] || bill.bulan} ${bill.tahun}`;
         tr.innerHTML = `
         <td class="py-3 px-4 font-semibold text-slate-800 flex items-center gap-2">
@@ -303,11 +405,21 @@
       `;
         tbody.appendChild(tr);
       });
-      document.getElementById("res-nominal").textContent = formatRupiah(data.nominal);
-      document.getElementById("res-penalty-total").textContent = formatRupiah(bills.reduce((a, b) => a + b.denda, 0));
-      document.getElementById("res-misc-total").textContent = formatRupiah(bills.reduce((a, b) => a + b.nonair, 0));
-      document.getElementById("res-admin-fee").textContent = formatRupiah(data.admin);
-      document.getElementById("res-total-amount").textContent = formatRupiah(data.total_bayar);
+      document.getElementById("res-nominal").textContent = formatRupiah(
+        data.nominal
+      );
+      document.getElementById("res-penalty-total").textContent = formatRupiah(
+        bills.reduce((a, b) => a + b.denda, 0)
+      );
+      document.getElementById("res-misc-total").textContent = formatRupiah(
+        bills.reduce((a, b) => a + b.nonair, 0)
+      );
+      document.getElementById("res-admin-fee").textContent = formatRupiah(
+        data.admin
+      );
+      document.getElementById("res-total-amount").textContent = formatRupiah(
+        data.total_bayar
+      );
       document.getElementById("res-terbilang").textContent = `"${terbilang(data.total_bayar)}"`;
       this.resultCardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
@@ -319,7 +431,11 @@
     }
     async handlePaymentSubmit() {
       if (!this.currentInquiry) {
-        this.showAlert("error", "Error", "Silakan lakukan inquiry terlebih dahulu.");
+        this.showAlert(
+          "error",
+          "Error",
+          "Silakan lakukan inquiry terlebih dahulu."
+        );
         return;
       }
       const inq = this.currentInquiry;
@@ -346,7 +462,11 @@
         this.resetInquiryView();
         this.loadTransactionHistory();
       } catch (err) {
-        this.showAlert("error", "Pembayaran Gagal", err.message || "Terjadi kesalahan sistem saat pembayaran.");
+        this.showAlert(
+          "error",
+          "Pembayaran Gagal",
+          err.message || "Terjadi kesalahan sistem saat pembayaran."
+        );
       } finally {
         this.btnProceedPayment.disabled = false;
         this.btnProceedPayment.innerHTML = '<i class="fa-solid fa-credit-card"></i><span>Konfirmasi & Bayar Sekarang</span>';
@@ -356,9 +476,14 @@
       this.modalReceiptContent.textContent = receiptText;
       if (transactionId) {
         this.btnDownloadReceipt.href = `/api/transactions/${transactionId}/receipt`;
-        this.btnDownloadReceipt.setAttribute("download", `struk_${transactionId}.txt`);
+        this.btnDownloadReceipt.setAttribute(
+          "download",
+          `struk_${transactionId}.txt`
+        );
       } else {
-        const blob = new Blob([receiptText], { type: "text/plain;charset=utf-8" });
+        const blob = new Blob([receiptText], {
+          type: "text/plain;charset=utf-8"
+        });
         this.btnDownloadReceipt.href = URL.createObjectURL(blob);
         this.btnDownloadReceipt.setAttribute("download", "struk_pembayaran.txt");
       }
@@ -374,7 +499,8 @@
       try {
         const res = await fetch("/api/transactions?limit=100");
         const json = await res.json();
-        if (json.rc !== "00" || !json.data) throw new Error(json.ket || "Gagal mengambil riwayat transaksi.");
+        if (json.rc !== "00" || !json.data)
+          throw new Error(json.ket || "Gagal mengambil riwayat transaksi.");
         this.allTransactions = json.data;
         this.renderTransactionTable(this.allTransactions);
       } catch (err) {
@@ -425,17 +551,20 @@
           </div>
         </td>
       `;
-        tr.querySelector(".btn-view-receipt")?.addEventListener("click", async () => {
-          try {
-            const res = await fetch(`/api/transactions/${tx.id}`);
-            const json = await res.json();
-            if (json.rc === "00" && json.data?.receiptText) {
-              this.openReceiptModal(json.data.receiptText, tx.id);
+        tr.querySelector(".btn-view-receipt")?.addEventListener(
+          "click",
+          async () => {
+            try {
+              const res = await fetch(`/api/transactions/${tx.id}`);
+              const json = await res.json();
+              if (json.rc === "00" && json.data?.receiptText) {
+                this.openReceiptModal(json.data.receiptText, tx.id);
+              }
+            } catch (e) {
+              console.error(e);
             }
-          } catch (e) {
-            console.error(e);
           }
-        });
+        );
         this.historyTbody.appendChild(tr);
       });
     }

@@ -1,14 +1,8 @@
-import { eq, desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
+import type { TransactionRecord } from "../domain/transaction.js";
 import { getDatabase } from "./connection.js";
-import { transactions, NewTransactionRow } from "./schema.js";
-import { TransactionRecord } from "../models/transaction.js";
+import { type NewTransactionRow, transactions } from "./schema.js";
 
-/**
- * Repository layer: MySQL persistence for transactions (Drizzle ORM).
- * All SQL lives here; services never see SQL or rows — only entities.
- */
-
-/** Map a Drizzle row to the domain entity (1:1, no coercion needed). */
 function toRecord(row: typeof transactions.$inferSelect): TransactionRecord {
   return {
     id: row.id,
@@ -36,7 +30,9 @@ function toRecord(row: typeof transactions.$inferSelect): TransactionRecord {
 }
 
 export class TransactionRepository {
-  public static async create(data: NewTransactionRow): Promise<TransactionRecord> {
+  public static async create(
+    data: NewTransactionRow,
+  ): Promise<TransactionRecord> {
     const db = getDatabase();
     const result = await db.insert(transactions).values(data);
     const insertedId = Number(result[0].insertId);
@@ -47,7 +43,9 @@ export class TransactionRepository {
     return fetched;
   }
 
-  public static async findAll(limit: number = 100): Promise<TransactionRecord[]> {
+  public static async findAll(
+    limit: number = 100,
+  ): Promise<TransactionRecord[]> {
     const db = getDatabase();
     const rows = await db
       .select()
@@ -67,7 +65,9 @@ export class TransactionRepository {
     return rows[0] ? toRecord(rows[0]) : null;
   }
 
-  public static async findByRef2(ref2: string): Promise<TransactionRecord | null> {
+  public static async findByRef2(
+    ref2: string,
+  ): Promise<TransactionRecord | null> {
     const db = getDatabase();
     const rows = await db
       .select()

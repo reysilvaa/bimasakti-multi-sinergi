@@ -1,28 +1,15 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
+import { paymentRequestSchema } from "../domain/payment.js";
 import { PaymentService } from "../services/paymentService.js";
-import { envelope } from "../utils/apiResponse.js";
-import { sendError } from "./errorMapper.js";
+import { RC, envelope } from "../domain/protocol.js";
 
-/**
- * Controller layer: payment HTTP adapter.
- * Parse HTTP input → call service → map result/ApiError to the spec envelope.
- */
 export async function payment(req: Request, res: Response): Promise<void> {
-  try {
-    const result = await PaymentService.pay(req.body as {
-      productCode?: string;
-      customerId?: string;
-      ref1?: string;
-      ref2?: string;
-      nominal?: string | number;
-    });
-    res.json(
-      envelope("00", result.keterangan, {
-        transaction: result.transaction,
-        receiptText: result.receiptText,
-      })
-    );
-  } catch (err) {
-    sendError(res, err);
-  }
+  const body = paymentRequestSchema.parse(req.body);
+  const result = await PaymentService.pay(body);
+  res.json(
+    envelope(RC.SUCCESS, result.keterangan, {
+      transaction: result.transaction,
+      receiptText: result.receiptText,
+    }),
+  );
 }
