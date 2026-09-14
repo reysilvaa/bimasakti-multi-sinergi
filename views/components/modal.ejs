@@ -1,0 +1,32 @@
+<!-- Receipt modal -->
+<div id="receipt-modal" class="fixed inset-0 z-[70] hidden bg-black/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto print:static print:p-0 print:bg-transparent print:backdrop-blur-none">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden my-8 border border-black/[0.06] print:m-0 print:p-0 print:border-none print:shadow-none print:max-w-none">
+    <div class="px-6 py-4 flex items-center justify-between border-b border-black/[0.06] print:hidden">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-black/[0.04] flex items-center justify-center text-ink-900">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h10a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-6.5 3.5V5A1.5 1.5 0 0 1 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <h3 class="text-[14px] font-bold tracking-tight">Struk Pembayaran</h3>
+          <p class="text-[11px] text-ink-800/40">Bukti transaksi sah PDAM</p>
+        </div>
+      </div>
+      <button type="button" id="btn-close-receipt-modal" class="print:hidden w-8 h-8 rounded-xl bg-black/[0.04] hover:bg-black/[0.08] flex items-center justify-center transition-colors text-ink-800/60" title="Tutup struk pembayaran" aria-label="Tutup struk pembayaran">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="p-6 print:p-0">
+      <div class="receipt-paper bg-mist-50/70 p-5 rounded-xl border border-black/[0.07] font-mono text-xs text-ink-950 leading-relaxed overflow-x-auto whitespace-pre select-all print:bg-transparent print:border-none print:p-0 print:text-black print:text-[11pt] print:leading-snug" id="modal-receipt-content"></div>
+    </div>
+    <div class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-end gap-2.5 bg-mist-50/30 print:hidden">
+      <button type="button" id="btn-print-receipt" class="h-10 px-4 rounded-xl border border-black/[0.1] hover:bg-white text-ink-900 text-[13px] font-semibold transition-all flex items-center gap-2 shadow-xs">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6v-7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Cetak</span>
+      </button>
+      <a id="btn-download-receipt" href="#" download="" class="h-10 px-4 rounded-xl bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-semibold transition-all flex items-center gap-2 shadow-sm shadow-accent-500/20">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Unduh TXT</span>
+      </a>
+    </div>
+  </div>
+</div>

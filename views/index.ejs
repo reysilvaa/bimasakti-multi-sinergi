@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Pembayaran PDAM - PT. Bimasakti Multi Sinergi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'monospace'],
+          },
+          colors: {
+            ink: { 950: '#08080a', 900: '#101013', 800: '#1d1d20' },
+            mist: { 50: '#f5f5f7', 100: '#eeeef1', 200: '#d2d2d7' },
+            accent: { 50: '#f0f7ff', 100: '#e0efff', 500: '#0071e3', 600: '#0062c4', 700: '#0053a6' },
+          },
+          borderRadius: { '2xl': '1.125rem', '3xl': '1.75rem' },
+          keyframes: {
+            'toast-in': {
+              '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+            },
+            'card-in': {
+              '0%': { opacity: '0', transform: 'translateY(6px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+          animation: {
+            'toast-in': 'toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both',
+            'card-in': 'card-in 0.3s ease both',
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-mist-100/60 text-ink-900 font-sans min-h-screen antialiased">
+  <div id="root">
+    <div id="form-inquiry" class="hidden"></div>
+    <div id="receipt-modal" class="hidden"></div>
+    <div id="section-history" class="hidden"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

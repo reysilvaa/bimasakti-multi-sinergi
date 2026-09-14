@@ -19,6 +19,10 @@
 			"preset": "recommended",
 			"style": {
 				"noNonNullAssertion": "off"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "off",
+				"noStaticElementInteractions": "off"
 			}
 		}
 	},

@@ -69,7 +69,29 @@ const dot = (n: number): string => n.toLocaleString("id-ID");
 
 export function periodLabel(b: SpecBill): string {
   const idx = toInt(b.bulan) - 1;
-  return `${MONTH_NAMES[idx] || b.bulan}${b.tahun}`;
+  return `${MONTH_NAMES[idx] || b.bulan} ${b.tahun}`;
+}
+
+function formatFeeLine(label: string, amount: number): string {
+  return `${label.padEnd(15, " ")}: Rp${dot(amount).padStart(14, " ")}`;
+}
+
+function wrapWords(text: string, maxLen = 50): string[] {
+  const words = text.trim().split(/\s+/);
+  const result: string[] = [];
+  let current = "";
+  for (const word of words) {
+    if (!current) {
+      current = word;
+    } else if ((current + " " + word).length <= maxLen) {
+      current += " " + word;
+    } else {
+      result.push(current);
+      current = word;
+    }
+  }
+  if (current) result.push(current);
+  return result;
 }
 
 export function generateReceiptText(tx: TransactionRecord): string {
@@ -82,43 +104,48 @@ export function generateReceiptText(tx: TransactionRecord): string {
   const bills = Object.values(billsMap);
   const pdamName =
     tx.pdamName || SUPPORTED_PRODUCTS[tx.productCode]?.name || "PDAM";
+
   const billLines =
     bills.length > 0
-      ? bills.map((b) => ` ${periodLabel(b)} :Rp ${dot(b.air)}`)
-      : [` BULAN 1 :Rp ${dot(tx.nominal)}`];
+      ? bills.map(
+          (b) =>
+            `${("  " + periodLabel(b)).padEnd(15, " ")}: Rp${dot(b.air).padStart(14, " ")}`,
+        )
+      : [
+          `${"  BULAN 1".padEnd(15, " ")}: Rp${dot(tx.nominal).padStart(14, " ")}`,
+        ];
+
+  const noResi = tx.noResi || tx.ref2 || raw?.noref2 || raw?.ref2 || "-";
 
   const lines: string[] = [
     `STRUK PEMBAYARAN ${pdamName}`,
-    `TANGGAL        : ${formatReceiptDate(raw?.waktu)}`,
-    `NO. RESI       : ${tx.noResi || "-"}`,
-    `NAMA PAM       : ${pdamName}`,
-    `NO. PELANGGAN  : ${tx.customerId}`,
-    `NAMA           : ${tx.customerName || "-"}`,
-    `ALAMAT         : ${tx.customerAddress || "-"}`,
+    `${"TANGGAL".padEnd(15, " ")}: ${formatReceiptDate(raw?.waktu)}`,
+    `${"NO. RESI".padEnd(15, " ")}: ${noResi}`,
+    `${"NAMA PAM".padEnd(15, " ")}: ${pdamName}`,
+    `${"NO. PELANGGAN".padEnd(15, " ")}: ${tx.customerId}`,
+    `${"NAMA".padEnd(15, " ")}: ${tx.customerName || raw?.customername || "-"}`,
+    `${"ALAMAT".padEnd(15, " ")}: ${tx.customerAddress || raw?.customeraddress || "-"}`,
   ];
 
   const isBondowoso = tx.productCode === "WABONDO";
-  if (isBondowoso) {
-    lines.push(`PEMAKAIAN      : ${tx.meterUsage}M3`);
+  if (isBondowoso || (tx.meterUsage !== undefined && tx.meterUsage > 0)) {
+    lines.push(`${"PEMAKAIAN".padEnd(15, " ")}: ${tx.meterUsage} M3`);
+  }
+
+  lines.push("RINCIAN TAGIHAN", ...billLines);
+  lines.push(formatFeeLine("DENDA", tx.penalty));
+
+  if (isBondowoso || tx.miscFee > 0) {
+    lines.push(formatFeeLine("BEBAN", tx.miscFee));
   }
 
   lines.push(
-    "RINCIAN TAGIHAN",
-    ...billLines,
-    `DENDA          :Rp ${dot(tx.penalty)}`,
-  );
-
-  if (isBondowoso) {
-    lines.push(`BEBAN          :Rp ${dot(tx.miscFee)}`);
-  }
-
-  lines.push(
-    `ADMIN          :Rp ${dot(tx.adminFee)}`,
-    "                    -------------------------",
-    `TOTAL TAGIHAN  :Rp ${dot(tx.totalAmount)}`,
+    formatFeeLine("ADMIN", tx.adminFee),
+    `${" ".repeat(17)}${"-".repeat(21)}`,
+    formatFeeLine("TOTAL TAGIHAN", tx.totalAmount),
     "",
-    "TERBILANG      :",
-    tx.terbilang || terbilang(tx.totalAmount),
+    `${"TERBILANG".padEnd(15, " ")}:`,
+    ...wrapWords(tx.terbilang || terbilang(tx.totalAmount), 50),
     "",
     `${pdamName} MENYATAKAN STRUK INI`,
     "SEBAGAI BUKTI PEMBAYARAN YANG SAH",

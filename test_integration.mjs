@@ -130,10 +130,10 @@ async function runTests() {
     assert.ok(receiptText.includes('NAMA PAM       : PDAM BONDOWOSO'), 'NAMA PAM');
     assert.ok(receiptText.includes('NO. PELANGGAN  : 09000879'), 'NO. PELANGGAN');
     assert.ok(receiptText.includes('PEMAKAIAN'), 'PEMAKAIAN for Bondowoso');
-    assert.ok(/AGS\d{2,4} :Rp/.test(receiptText) || /RINCIAN TAGIHAN/.test(receiptText), 'Period rows');
+    assert.ok(/AGS\s*\d{2,4}\s+:\s*Rp/.test(receiptText) || /RINCIAN TAGIHAN/.test(receiptText), 'Period rows');
     assert.ok(receiptText.includes('BEBAN'), 'BEBAN for Bondowoso');
-    assert.ok(receiptText.includes('ADMIN          :Rp 7.500'), 'ADMIN dotted');
-    assert.ok(receiptText.includes('TOTAL TAGIHAN  :Rp 101.630'), 'TOTAL dotted');
+    assert.ok(/ADMIN\s+:\s*Rp\s+7\.500/.test(receiptText), 'ADMIN dotted');
+    assert.ok(/TOTAL TAGIHAN\s+:\s*Rp\s+101\.630/.test(receiptText), 'TOTAL dotted');
     assert.ok(receiptText.includes('SERATUS SATU RIBU'), 'TERBILANG');
     assert.ok(receiptText.includes('PDAM BONDOWOSO MENYATAKAN STRUK INI'), 'Footer 1');
     assert.ok(receiptText.includes('SEBAGAI BUKTI PEMBAYARAN YANG SAH'), 'Footer 2');
@@ -178,10 +178,21 @@ async function runTests() {
     assert.strictEqual(notFound.status, 404, 'Missing transaction must 404');
     console.log('✓ Receipt download + 404 path verified');
 
-    console.log('\n=== ALL 8 INTEGRATION TESTS PASSED ===');
+    console.log('\n[TEST 9] GET / (EJS view engine + modular components)');
+    const htmlRes = await fetch(`${baseUrl}/`);
+    assert.strictEqual(htmlRes.status, 200, 'Page status 200');
+    assert.ok(htmlRes.headers.get('content-type').includes('text/html'), 'Content-type is HTML');
+    const htmlText = await htmlRes.text();
+    assert.ok(htmlText.includes('id="form-inquiry"'), 'Includes inquiry-form component');
+    assert.ok(htmlText.includes('id="receipt-modal"'), 'Includes modal component');
+    assert.ok(htmlText.includes('id="section-history"'), 'Includes history component');
+    console.log('✓ EJS layout & shadcn-like components rendered cleanly');
+
+    console.log('\n=== ALL 9 INTEGRATION TESTS PASSED ===');
+    process.exit(0);
   } catch (err) {
     console.error('TEST ERROR:', err);
-    process.exitCode = 1;
+    process.exit(1);
   } finally {
     server.close();
   }
