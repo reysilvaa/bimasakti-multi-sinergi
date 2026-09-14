@@ -16,7 +16,7 @@
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "format": "biome format --write src",
-    "decomment": "node scripts/strip-comments.mjs src",
+    "decomment": "node scripts/strip-comments.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node dist/scripts/migrate.js",
     "start": "node dist/server.js",

@@ -6,6 +6,7 @@ import express, {
   type Response,
   Router,
 } from "express";
+import { CONFIG } from "@/config/constants.js";
 
 const viewsPath = path.resolve(process.cwd(), "views");
 
@@ -15,16 +16,22 @@ function sendCompressed(
   contentType: string,
   enc: unknown,
 ): boolean {
+  if (CONFIG.NODE_ENV !== "production") return false;
   const encStr = typeof enc === "string" ? enc : "";
+  const baseStat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
   for (const [algo, ext] of [
     ["zstd", "zst"],
     ["br", "br"],
     ["gzip", "gz"],
   ] as const) {
-    if (encStr.includes(algo) && fs.existsSync(`${filePath}.${ext}`)) {
+    const compPath = `${filePath}.${ext}`;
+    if (encStr.includes(algo) && fs.existsSync(compPath)) {
+      if (baseStat && fs.statSync(compPath).mtimeMs < baseStat.mtimeMs) {
+        continue;
+      }
       res.setHeader("Content-Encoding", algo);
       res.setHeader("Content-Type", contentType);
-      res.sendFile(`${filePath}.${ext}`);
+      res.sendFile(compPath);
       return true;
     }
   }

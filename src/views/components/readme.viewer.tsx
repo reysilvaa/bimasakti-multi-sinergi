@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { marked, type Renderer } from "marked";
+import { Marked, type Tokens } from "marked";
 import { Button, Card } from "@/views/components/ui/index.js";
 
 interface TocItem {
@@ -8,18 +8,20 @@ interface TocItem {
   level: number;
 }
 
-function buildRenderer(): Partial<Renderer> {
-  const toId = (text: string) =>
-    text
-      .replace(/<[^>]*>/g, "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^\w]+/g, "-")
-      .replace(/^-|-$/g, "");
+const toId = (text: string) =>
+  text
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w]+/g, "-")
+    .replace(/^-|-$/g, "");
 
-  return {
-    code(token) {
-      const { text, lang } = token as { text: string; lang?: string };
+const md = new Marked({ gfm: true });
+
+md.use({
+  renderer: {
+    code(token: Tokens.Code) {
+      const { text, lang } = token;
       if (lang === "mermaid") {
         return `<div class="mermaid my-6 flex justify-center bg-white border border-black/[0.07] rounded-xl p-6 overflow-x-auto">${text}</div>`;
       }
@@ -30,91 +32,92 @@ function buildRenderer(): Partial<Renderer> {
       return `<div class="my-5 rounded-xl overflow-hidden border border-black/[0.08] shadow-sm bg-[#1e293b] text-white"><div class="px-4 py-2 bg-slate-900 border-b border-slate-700/60 flex items-center justify-between text-xs font-mono text-slate-400"><span>${lang ?? "text"}</span><button type="button" class="px-2 py-1 hover:text-white transition-colors cursor-pointer rounded bg-slate-800 hover:bg-slate-700 text-[11px]" onclick="navigator.clipboard.writeText(this.closest('.my-5').querySelector('code').innerText);this.innerText='Tersalin!';setTimeout(()=>this.innerText='Salin',2000)">Salin</button></div><pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed text-emerald-300"><code>${escaped.trim()}</code></pre></div>`;
     },
 
-    heading(token) {
-      const { depth, text } = token as { depth: number; text: string };
-      const id = toId(text);
+    heading(token: Tokens.Heading) {
+      const text = this.parser.parseInline(token.tokens);
+      const plainText = token.text.replace(/<[^>]*>/g, "").trim();
+      const id = toId(plainText);
       const cls: Record<number, string> = {
         1: "text-2xl lg:text-3xl font-bold text-ink-950 tracking-tight pb-3 mb-6 border-b border-black/[0.08]",
         2: "text-xl font-bold text-ink-900 tracking-tight pt-8 pb-2 mb-4 border-b border-black/[0.06]",
         3: "text-base font-bold text-ink-900 pt-5 pb-1 mb-2",
         4: "text-sm font-bold text-ink-900 pt-4 pb-1",
       };
-      return `<h${depth} id="${id}" class="${cls[depth] ?? "text-sm font-semibold text-ink-900 pt-3"}">${text}</h${depth}>`;
+      return `<h${token.depth} id="${id}" class="${cls[token.depth] ?? "text-sm font-semibold text-ink-900 pt-3"}">${text}</h${token.depth}>`;
     },
 
-    image(token) {
-      const { href, text } = token as { href: string; text: string };
-      return `<figure class="my-6 text-center"><img src="${href}" alt="${text}" class="rounded-xl border border-black/[0.08] shadow-md max-w-full h-auto mx-auto cursor-pointer hover:opacity-95 transition-opacity" onclick="window.__openImageModal&&window.__openImageModal('${href}')" />${text ? `<figcaption class="text-xs text-ink-800/50 mt-2 italic">${text}</figcaption>` : ""}</figure>`;
+    image(token: Tokens.Image) {
+      const { href, text } = token;
+      if (href.includes("shields.io") || href.includes("/badge/")) {
+        return `<img src="${href}" alt="${text || ""}" class="inline-block h-5 align-middle mr-1.5 my-1" />`;
+      }
+      return `<figure class="my-6 text-center"><img src="${href}" alt="${text || ""}" class="rounded-xl border border-black/[0.08] shadow-md max-w-full h-auto mx-auto cursor-pointer hover:opacity-95 transition-opacity" onclick="window.__openImageModal&&window.__openImageModal('${href}')" />${text ? `<figcaption class="text-xs text-ink-800/50 mt-2 italic">${text}</figcaption>` : ""}</figure>`;
     },
 
-    paragraph(token) {
-      const { text } = token as { text: string };
-      return `<p class="text-[13px] text-ink-800/85 leading-relaxed my-3">${text}</p>`;
+    paragraph(token: Tokens.Paragraph) {
+      return `<p class="text-[13px] text-ink-800/85 leading-relaxed my-3">${this.parser.parseInline(token.tokens)}</p>`;
     },
 
-    list(token) {
-      const { ordered, body } = token as unknown as { ordered: boolean; body: string };
-      const tag = ordered ? "ol" : "ul";
-      const cls = ordered
+    list(token: Tokens.List) {
+      let body = "";
+      for (const item of token.items) {
+        body += this.listitem(item);
+      }
+      const tag = token.ordered ? "ol" : "ul";
+      const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : "";
+      const cls = token.ordered
         ? "my-3 space-y-1 pl-5 list-decimal marker:text-ink-400"
         : "my-3 space-y-1 pl-5 list-disc marker:text-ink-400";
-      return `<${tag} class="${cls}">${body}</${tag}>`;
+      return `<${tag}${startAttr} class="${cls}">${body}</${tag}>`;
     },
 
-    listitem(token) {
-      const { text } = token as { text: string };
-      return `<li class="text-[13px] text-ink-800 leading-relaxed">${text}</li>`;
+    listitem(token: Tokens.ListItem) {
+      return `<li class="text-[13px] text-ink-800 leading-relaxed">${this.parser.parse(token.tokens)}</li>`;
     },
 
-    blockquote(token) {
-      const { text } = token as { text: string };
-      return `<blockquote class="my-4 pl-4 border-l-4 border-accent-500/40 italic text-ink-800/70 text-sm leading-relaxed">${text}</blockquote>`;
+    blockquote(token: Tokens.Blockquote) {
+      return `<blockquote class="my-4 pl-4 border-l-4 border-accent-500/40 italic text-ink-800/70 text-sm leading-relaxed">${this.parser.parse(token.tokens)}</blockquote>`;
     },
 
     hr() {
       return `<hr class="my-8 border-t border-black/[0.08]" />`;
     },
 
-    table(token) {
-      const { header, rows } = token as unknown as { header: string; rows: string };
-      return `<div class="my-6 overflow-x-auto rounded-xl border border-black/[0.08] shadow-sm bg-white"><table class="w-full text-xs text-left"><thead class="bg-mist-50/60 border-b border-black/[0.06] text-ink-800 font-bold uppercase tracking-wider text-[11px]"><tr>${header}</tr></thead><tbody class="divide-y divide-black/[0.04]">${rows}</tbody></table></div>`;
+    table(token: Tokens.Table) {
+      let headerCells = "";
+      for (const cell of token.header) {
+        const alignAttr = cell.align ? ` align="${cell.align}"` : "";
+        headerCells += `<th class="px-4 py-3"${alignAttr}>${this.parser.parseInline(cell.tokens)}</th>`;
+      }
+      let bodyRows = "";
+      for (const row of token.rows) {
+        let rowCells = "";
+        for (const cell of row) {
+          const alignAttr = cell.align ? ` align="${cell.align}"` : "";
+          rowCells += `<td class="px-4 py-2.5 text-ink-900 leading-relaxed"${alignAttr}>${this.parser.parseInline(cell.tokens)}</td>`;
+        }
+        bodyRows += `<tr class="hover:bg-mist-50/40 transition-colors">${rowCells}</tr>`;
+      }
+      return `<div class="my-6 overflow-x-auto rounded-xl border border-black/[0.08] shadow-sm bg-white"><table class="w-full text-xs text-left"><thead class="bg-mist-50/60 border-b border-black/[0.06] text-ink-800 font-bold uppercase tracking-wider text-[11px]"><tr>${headerCells}</tr></thead><tbody class="divide-y divide-black/[0.04]">${bodyRows}</tbody></table></div>`;
     },
 
-    tablerow(token) {
-      const { text } = token as { text: string };
-      return `<tr class="hover:bg-mist-50/40 transition-colors">${text}</tr>`;
+    codespan(token: Tokens.Codespan) {
+      return `<code class="px-1.5 py-0.5 rounded bg-mist-100 text-accent-700 font-mono text-[11px] border border-black/[0.05]">${token.text}</code>`;
     },
 
-    tablecell(token) {
-      const { text, header } = token as { text: string; header: boolean };
-      const tag = header ? "th" : "td";
-      const cls = header ? "px-4 py-3" : "px-4 py-2.5 text-ink-900 leading-relaxed";
-      return `<${tag} class="${cls}">${text}</${tag}>`;
+    strong(token: Tokens.Strong) {
+      return `<strong class="font-bold text-ink-950">${this.parser.parseInline(token.tokens)}</strong>`;
     },
 
-    codespan(token) {
-      const { text } = token as { text: string };
-      return `<code class="px-1.5 py-0.5 rounded bg-mist-100 text-accent-700 font-mono text-[11px] border border-black/[0.05]">${text}</code>`;
+    em(token: Tokens.Em) {
+      return `<em class="italic text-ink-800/80">${this.parser.parseInline(token.tokens)}</em>`;
     },
 
-    strong(token) {
-      const { text } = token as { text: string };
-      return `<strong class="font-bold text-ink-950">${text}</strong>`;
+    link(token: Tokens.Link) {
+      const content = token.tokens ? this.parser.parseInline(token.tokens) : token.text;
+      return `<a href="${token.href}" target="_blank" rel="noreferrer" class="text-accent-600 hover:text-accent-700 font-semibold underline decoration-accent-500/30 hover:decoration-accent-600 transition-colors">${content}</a>`;
     },
-
-    em(token) {
-      const { text } = token as { text: string };
-      return `<em class="italic text-ink-800/80">${text}</em>`;
-    },
-
-    link(token) {
-      const { href, text } = token as { href: string; text: string };
-      return `<a href="${href}" target="_blank" rel="noreferrer" class="text-accent-600 hover:text-accent-700 font-semibold underline decoration-accent-500/30 hover:decoration-accent-600 transition-colors">${text}</a>`;
-    },
-  };
-}
-
-const mdRenderer = buildRenderer();
+  },
+});
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -197,7 +200,7 @@ export function ReadmeViewer({
 
   // Render markdown via marked
   const renderedHtml = useMemo(
-    () => (content ? String(marked.parse(content, { renderer: mdRenderer as Renderer, gfm: true })) : ""),
+    () => (content ? String(md.parse(content)) : ""),
     [content],
   );
 
