@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { Marked, type Tokens } from "marked";
 import { Button, Card } from "@/views/components/ui/index.js";
+import defaultReadmeContent from "../../../README.md";
 
 interface TocItem {
   id: string;
@@ -129,20 +130,10 @@ export function ReadmeViewer({
 }: {
   onNavigateToApp?: () => void;
 }) {
-  const [content, setContent] = useState<string>("");
+  const content = defaultReadmeContent;
   const [copied, setCopied] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [mermaidReady, setMermaidReady] = useState(false);
-
-  // Fetch README from API
-  useEffect(() => {
-    fetch("/api/readme")
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.rc === "00" && res.data?.content) setContent(res.data.content);
-      })
-      .catch(() => {});
-  }, []);
 
   // Load Mermaid.js once from CDN
   useEffect(() => {

@@ -30,19 +30,4 @@ router.get("/transactions", listTransactions);
 router.get("/transactions/:id", getTransaction);
 router.get("/transactions/:id/receipt", downloadReceipt);
 
-router.get("/readme", async (_req, res, next) => {
-  try {
-    const fs = await import("node:fs");
-    const path = await import("node:path");
-    const readmePath = path.resolve(process.cwd(), "README.md");
-    if (fs.existsSync(readmePath)) {
-      const content = fs.readFileSync(readmePath, "utf-8");
-      return res.json({ rc: "00", ket: "sukses", data: { content } });
-    }
-    return res.json({ rc: "00", ket: "sukses", data: { content: "" } });
-  } catch (err) {
-    next(err);
-  }
-});
-
 export default router;

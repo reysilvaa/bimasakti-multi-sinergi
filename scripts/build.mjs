@@ -63,6 +63,7 @@ await esbuild.build({
   target: "es2020",
   jsx: "automatic",
   jsxImportSource: "preact",
+  loader: { ".md": "text" },
   minify: true,
   treeShaking: true,
   legalComments: "none",
