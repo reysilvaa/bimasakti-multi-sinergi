@@ -3,8 +3,8 @@ import { isSupportedProduct, type PdamProductCode } from "@/domain/product.js";
 import { RC } from "@/domain/protocol.js";
 import type { TransactionRecord } from "@/domain/transaction.js";
 import { TransactionRepository } from "@/repository/transaction.repository.js";
-import { RajabillerService } from "@/services/rajabillerService.js";
-import { generateReceiptText } from "@/services/receiptService.js";
+import { RajabillerService } from "@/services/rajabiller.service.js";
+import { generateReceiptText } from "@/services/receipt.service.js";
 
 export class PaymentService {
   public static async pay(input: {
@@ -60,7 +60,6 @@ export class PaymentService {
         keterangan: result.keterangan,
       };
     } catch (err: unknown) {
-      // SAFETY: standard MySQL duplicate key error inspection
       const error = err as { code?: string; errno?: number } | null;
       if (error && (error.code === "ER_DUP_ENTRY" || error.errno === 1062)) {
         const stored = await TransactionRepository.findByRef2(input.ref2);

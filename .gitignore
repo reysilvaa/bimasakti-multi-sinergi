@@ -3,3 +3,5 @@ dist/
 data/*.sqlite
 data/*.sqlite-*
 .env
+views/**/*.br
+views/**/*.gz

@@ -8,7 +8,7 @@ import type {
   RajabillerRequest,
 } from "@/domain/rajabiller.js";
 import type { TransactionRecord } from "@/domain/transaction.js";
-import { extractBills } from "@/services/receiptService.js";
+import { extractBills } from "@/services/receipt.service.js";
 import { toInt } from "@/utils/helpers.js";
 import { terbilang } from "@/utils/terbilang.js";
 

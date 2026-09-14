@@ -2,7 +2,7 @@ import { ApiError } from "@/domain/errors.js";
 import { RC } from "@/domain/protocol.js";
 import type { TransactionRecord } from "@/domain/transaction.js";
 import { TransactionRepository } from "@/repository/transaction.repository.js";
-import { generateReceiptText } from "@/services/receiptService.js";
+import { generateReceiptText } from "@/services/receipt.service.js";
 
 const MAX_HISTORY_LIMIT = 500;
 const DEFAULT_HISTORY_LIMIT = 100;

@@ -3,9 +3,9 @@ import {
   downloadReceipt,
   getTransaction,
   listTransactions,
-} from "@/controllers/historyController.js";
-import { inquiry } from "@/controllers/inquiryController.js";
-import { payment } from "@/controllers/paymentController.js";
+} from "@/controllers/history.controller.js";
+import { inquiry } from "@/controllers/inquiry.controller.js";
+import { payment } from "@/controllers/payment.controller.js";
 import { SUPPORTED_PRODUCTS } from "@/domain/product.js";
 import { RC } from "@/domain/protocol.js";
 

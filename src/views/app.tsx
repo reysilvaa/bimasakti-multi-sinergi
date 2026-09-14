@@ -1,15 +1,22 @@
 import { useEffect, useState } from "preact/hooks";
 import type { InquiryData } from "@/domain/inquiry.js";
 import type { TransactionRecord } from "@/domain/transaction.js";
-import { FlowStepper } from "@/views/components/FlowStepper.js";
-import { Header } from "@/views/components/Header.js";
-import { HistoryTable } from "@/views/components/HistoryTable.js";
-import { InquiryForm } from "@/views/components/InquiryForm.js";
-import { InquiryResult } from "@/views/components/InquiryResult.js";
-import { ReceiptModal } from "@/views/components/ReceiptModal.js";
-import { Sidebar } from "@/views/components/Sidebar.js";
-import { type AlertState, Toast } from "@/views/components/Toast.js";
-import type { Envelope, Product } from "@/views/utils.js";
+import {
+  getProducts,
+  getTransactionDetail,
+  getTransactions,
+  requestInquiry,
+  requestPayment,
+} from "@/views/api/pdam.api.js";
+import { FlowStepper } from "@/views/components/flow.stepper.js";
+import { Header } from "@/views/components/header.js";
+import { HistoryTable } from "@/views/components/history.table.js";
+import { InquiryForm } from "@/views/components/inquiry.form.js";
+import { InquiryResult } from "@/views/components/inquiry.result.js";
+import { ReceiptModal } from "@/views/components/receipt.modal.js";
+import { Sidebar } from "@/views/components/sidebar.js";
+import { type AlertState, Toast } from "@/views/components/toast.js";
+import type { Product } from "@/views/utils.js";
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<"inquiry" | "history">(
@@ -47,12 +54,11 @@ export function App() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch("/api/products");
-      const json: Envelope<Product[]> = await res.json();
-      if (json.rc === "00" && json.data && json.data.length > 0) {
-        setProducts(json.data);
-        setSelectedProduct(json.data[0].code);
-        setCustomerId(json.data[0].defaultIdpel);
+      const data = await getProducts();
+      if (data.length > 0) {
+        setProducts(data);
+        setSelectedProduct(data[0].code);
+        setCustomerId(data[0].defaultIdpel);
       }
     } catch (e) {
       console.error(e);
@@ -61,11 +67,8 @@ export function App() {
 
   const loadTransactions = async () => {
     try {
-      const res = await fetch("/api/transactions?limit=100");
-      const json: Envelope<TransactionRecord[]> = await res.json();
-      if (json.rc === "00" && json.data) {
-        setTransactions(json.data);
-      }
+      const data = await getTransactions(100);
+      setTransactions(data);
     } catch (e) {
       console.error(e);
     }
@@ -86,23 +89,12 @@ export function App() {
 
     setIsLoadingInquiry(true);
     try {
-      const res = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productCode: selectedProduct,
-          customerId: idpel,
-        }),
-      });
-      const json: Envelope<InquiryData> = await res.json();
-      if (json.rc !== "00" || !json.data) {
-        throw new Error(json.ket || "Gagal melakukan inquiry tagihan.");
-      }
-      setInquiryData(json.data);
+      const data = await requestInquiry(selectedProduct, idpel);
+      setInquiryData(data);
       showAlert(
         "success",
         "Inquiry Berhasil",
-        `Data tagihan untuk ${json.data.nama} ditemukan.`,
+        `Data tagihan untuk ${data.nama} ditemukan.`,
       );
     } catch (err: unknown) {
       setInquiryData(null);
@@ -122,31 +114,19 @@ export function App() {
 
     setIsPaying(true);
     try {
-      const res = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productCode: selectedProduct,
-          customerId: inquiryData.idpel,
-          ref1: inquiryData.ref1,
-          ref2: inquiryData.ref2,
-          nominal: inquiryData.nominal.toString(),
-        }),
+      const { data, ket } = await requestPayment({
+        productCode: selectedProduct,
+        customerId: inquiryData.idpel,
+        ref1: inquiryData.ref1,
+        ref2: inquiryData.ref2,
+        nominal: inquiryData.nominal.toString(),
       });
-      const json: Envelope<{
-        transaction: TransactionRecord;
-        receiptText: string;
-      }> = await res.json();
 
-      if (json.rc !== "00" || !json.data) {
-        throw new Error(json.ket || "Pembayaran gagal diproses.");
-      }
-
-      showAlert("success", "Pembayaran Berhasil!", json.ket);
+      showAlert("success", "Pembayaran Berhasil!", ket);
       setReceiptModal({
         isOpen: true,
-        text: json.data.receiptText,
-        txId: json.data.transaction.id,
+        text: data.receiptText,
+        txId: data.transaction.id,
       });
       setInquiryData(null);
       loadTransactions();
@@ -163,18 +143,12 @@ export function App() {
 
   const handleViewReceipt = async (tx: TransactionRecord) => {
     try {
-      const res = await fetch(`/api/transactions/${tx.id}`);
-      const json: Envelope<{
-        transaction: TransactionRecord;
-        receiptText: string;
-      }> = await res.json();
-      if (json.rc === "00" && json.data?.receiptText) {
-        setReceiptModal({
-          isOpen: true,
-          text: json.data.receiptText,
-          txId: tx.id,
-        });
-      }
+      const data = await getTransactionDetail(tx.id);
+      setReceiptModal({
+        isOpen: true,
+        text: data.receiptText,
+        txId: tx.id,
+      });
     } catch (e) {
       console.error(e);
     }
