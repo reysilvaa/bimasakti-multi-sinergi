@@ -28,7 +28,7 @@ export function collectFiles(dirs = STRIP_TARGETS) {
 }
 
 /**
- * Hand-written comment stripper for JS/TS/TSX — a character-level state
+ * Hand-written comment stripper for JS/TS/TSX  a character-level state
  * machine, no third-party parser. It tracks strings ('' "" `` with ${}
  * nesting), and disambiguates regex literals from division using the
  * previous significant character/keyword. JSX closing tags (`</div>`) and
@@ -159,7 +159,7 @@ export function stripJsComments(source) {
         i = j;
         continue;
       }
-      // not a valid regex — fall through as division
+      // not a valid regex  fall through as division
     }
 
     // ---- word tracking for keyword lookbehind ----
@@ -186,9 +186,9 @@ export function stripJsComments(source) {
 
 function isRegexStart(prevChar, prevWord, keywords, punctuators) {
   if (prevChar === undefined || prevChar === "\n") return true;
-  if (prevChar === ".") return true; // after property access never division? `.` means member — regex impossible after value; but `foo./re/` invalid anyway
+  if (prevChar === ".") return true; // after property access never division? `.` means member  regex impossible after value; but `foo./re/` invalid anyway
   if (/[\w$)"'\]`]/.test(prevChar)) {
-    // After a value/identifier — division, UNLESS preceded by a keyword that
+    // After a value/identifier  division, UNLESS preceded by a keyword that
     // takes an expression (return /re/, typeof /re/, ...).
     return keywords.has(prevWord);
   }

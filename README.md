@@ -17,7 +17,7 @@
 | :------- | :-------------------------------------------------------------------- |
 | Runtime  | Node.js `>= 22` + **Express 5** + TypeScript (ESM murni)              |
 | Database | **MySQL 8** via Drizzle ORM (`mysql2` pool) + migrasi versioned       |
-| Validasi | **Zod** — skema contract = single source of truth semua type domain   |
+| Validasi | **Zod** skema contract = single source of truth semua type domain     |
 | Frontend | **Preact + TSX** + Tailwind (esbuild bundle), UI gaya admin app-shell |
 | Kualitas | Biome (lint/format), `tsc --noEmit`, 9 tes integrasi E2E, knip        |
 
@@ -56,29 +56,29 @@ flowchart LR
 
 ### Prinsip Desain
 
-- **Contract sekali, di `src/domain/`** — setiap file domain memuat skema Zod + type turunan (`z.infer`) + aturan terkait. Tidak ada shape yang ditulis dua kali.
-- **Controllers tanpa try/catch** — Express 5 meneruskan async rejection ke error middleware global; controller hanya _throw_.
-- **Satu gaya error** — semua service melempar `ApiError` (bukan `Object.assign(new Error(...), { rc })`).
-- **`config/` = env saja** — tanpa data domain. Katalog produk tinggal di `domain/product.ts`.
-- **Import ESM eksplisit** — `./foo.js` di file `.ts` (syarat `moduleResolution: NodeNext`).
+- **Contract sekali, di `src/domain/`** setiap file domain memuat skema Zod + type turunan (`z.infer`) + aturan terkait. Tidak ada shape yang ditulis dua kali.
+- **Controllers tanpa try/catch** Express 5 meneruskan async rejection ke error middleware global; controller hanya _throw_.
+- **Satu gaya error** semua service melempar `ApiError` (bukan `Object.assign(new Error(...), { rc })`).
+- **`config/` = env saja** tanpa data domain. Katalog produk tinggal di `domain/product.ts`.
+- **Import ESM eksplisit** `./foo.js` di file `.ts` (syarat `moduleResolution: NodeNext`).
 
 ---
 
 ## Kontrak Domain (`src/domain/`)
 
-| File             | Isi                                                                                                        | Gaya             |
-| :--------------- | :--------------------------------------------------------------------------------------------------------- | :--------------- |
-| `product.ts`     | Katalog produk + `pdamProductCodeSchema` + guard — **satu deklarasi katalog, type/schema/guard di-derive** | zod + `as const` |
-| `inquiry.ts`     | `specBillSchema`, `inquiryDataSchema`, `inquiryRequestSchema`                                              | zod              |
-| `payment.ts`     | `paymentRequestSchema`                                                                                     | zod              |
-| `transaction.ts` | `transactionRecordSchema` → `TransactionRecord`                                                            | zod              |
-| `rajabiller.ts`  | Wire format request/response upstream (`.passthrough()` untuk field dinamis)                               | zod              |
-| `protocol.ts`    | `RC` (kode bisnis spec) + `envelopeSchema` + builder `envelope()`                                          | zod + `as const` |
-| `errors.ts`      | `ApiError` + normalizer `ApiError.from()`                                                                  | class            |
+| File             | Isi                                                                                                      | Gaya             |
+| :--------------- | :------------------------------------------------------------------------------------------------------- | :--------------- |
+| `product.ts`     | Katalog produk + `pdamProductCodeSchema` + guard **satu deklarasi katalog, type/schema/guard di-derive** | zod + `as const` |
+| `inquiry.ts`     | `specBillSchema`, `inquiryDataSchema`, `inquiryRequestSchema`                                            | zod              |
+| `payment.ts`     | `paymentRequestSchema`                                                                                   | zod              |
+| `transaction.ts` | `transactionRecordSchema` → `TransactionRecord`                                                          | zod              |
+| `rajabiller.ts`  | Wire format request/response upstream (`.passthrough()` untuk field dinamis)                             | zod              |
+| `protocol.ts`    | `RC` (kode bisnis spec) + `envelopeSchema` + builder `envelope()`                                        | zod + `as const` |
+| `errors.ts`      | `ApiError` + normalizer `ApiError.from()`                                                                | class            |
 
 ### Idempotensi Pembayaran
 
-`POST /api/payment` dengan `ref2` yang sudah tersimpan **ditolak `rc "33"`** dan mengembalikan transaksi asli + struknya — tanpa mengirim request kedua ke Rajabiller. Ditegakkan dua lapis: pre-check di `paymentService` + `UNIQUE(ref2)` di MySQL (race-free; lost race tertangkap dari `ER_DUP_ENTRY`).
+`POST /api/payment` dengan `ref2` yang sudah tersimpan **ditolak `rc "33"`** dan mengembalikan transaksi asli + struknya tanpa mengirim request kedua ke Rajabiller. Ditegakkan dua lapis: pre-check di `paymentService` + `UNIQUE(ref2)` di MySQL (race-free; lost race tertangkap dari `ER_DUP_ENTRY`).
 
 ---
 
@@ -225,7 +225,7 @@ npm start
 - Otomatis mengeliminasi komentar kode (`decomment`).
 - Mem-bundle client **Preact TSX** ke `views/js/app.js` & minify CSS.
 - Mem-bundle server TypeScript ESM ke `dist/server.js`.
-- Pre-kompresi multi-tier: **Zstandard (.zst)**, **Brotli (.br)**, dan **Gzip (.gz)** — disajikan oleh `middleware/static.middleware.ts` sesuai `Accept-Encoding`.
+- Pre-kompresi multi-tier: **Zstandard (.zst)**, **Brotli (.br)**, dan **Gzip (.gz)** disajikan oleh `middleware/static.middleware.ts` sesuai `Accept-Encoding`.
 
 Akses aplikasi di browser: **http://localhost:3000**
 
@@ -245,7 +245,7 @@ npm run typecheck
 npx knip
 ```
 
-`npm test` butuh MySQL berjalan dan `.env` terisi — database test dibuat/migrasi/truncate otomatis per run, DB development tidak tersentuh.
+`npm test` butuh MySQL berjalan dan `.env` terisi database test dibuat/migrasi/truncate otomatis per run, DB development tidak tersentuh.
 
 Cakupan 9 tes: daftar produk → validasi inquiry (envelope rc/ket) → inquiry WASDA (bentuk sesuai spec) → inquiry WABONDO → payment + layout struk sesuai spec → penolakan double-payment (idempoten, tanpa row kedua) → history + guard limit NaN → unduh struk + path 404 → render UI.
 
@@ -322,4 +322,4 @@ Aplikasi siap dideploy langsung ke Vercel:
    - **Environment Variables**: Tambahkan variabel dari `.env` (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `RAJABILLER_*`).
 3. Klik **Deploy**.
 
-> Catatan: gunakan MySQL yang dapat diakses publik (mis. PlanetScale/FreeDB) — Vercel serverless tidak bisa menjangkau `127.0.0.1` lokal.
+> Catatan: gunakan MySQL yang dapat diakses publik (mis. PlanetScale/FreeDB) Vercel serverless tidak bisa menjangkau `127.0.0.1` lokal.
