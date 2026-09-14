@@ -24,7 +24,7 @@ md.use({
     code(token: Tokens.Code) {
       const { text, lang } = token;
       if (lang === "mermaid") {
-        return `<div class="mermaid my-6 flex justify-center bg-white border border-black/[0.07] rounded-xl p-6 overflow-x-auto">${text}</div>`;
+        return `<div class="mermaid my-6 flex justify-center bg-white border border-black/[0.07] rounded-xl p-6 overflow-x-auto [&_foreignObject]:!overflow-visible [&_div]:!overflow-visible [&_svg]:max-w-full">${text}</div>`;
       }
       const escaped = text
         .replace(/&/g, "&amp;")
@@ -137,23 +137,40 @@ export function ReadmeViewer({
 
   // Load Mermaid.js once from CDN
   useEffect(() => {
+    const initMermaid = (m: { initialize: (c: object) => void }) => {
+      m.initialize({
+        startOnLoad: false,
+        theme: "neutral",
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        flowchart: {
+          curve: "linear",
+          htmlLabels: true,
+          useMaxWidth: true,
+          padding: 24,
+        },
+      });
+    };
+
     const existing = document.getElementById("mermaid-cdn");
     if (existing) {
-      // Already appended — might already be loaded
       const w = window as unknown as { mermaid?: { initialize: (c: object) => void } };
-      if (w.mermaid) setMermaidReady(true);
-      else existing.addEventListener("load", () => setMermaidReady(true));
+      if (w.mermaid) {
+        initMermaid(w.mermaid);
+        setMermaidReady(true);
+      } else {
+        existing.addEventListener("load", () => {
+          if (w.mermaid) initMermaid(w.mermaid);
+          setMermaidReady(true);
+        });
+      }
       return;
     }
     const s = document.createElement("script");
     s.id = "mermaid-cdn";
     s.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
     s.onload = () => {
-      (window as unknown as { mermaid?: { initialize: (c: object) => void } }).mermaid?.initialize({
-        startOnLoad: false,
-        theme: "neutral",
-        flowchart: { curve: "linear" },
-      });
+      const w = window as unknown as { mermaid?: { initialize: (c: object) => void } };
+      if (w.mermaid) initMermaid(w.mermaid);
       setMermaidReady(true);
     };
     document.head.appendChild(s);
