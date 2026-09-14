@@ -67,18 +67,22 @@ async function runTests() {
 
     assert.strictEqual(inqWasdaRes.rc, '00', 'WASDA inquiry must succeed');
     const d = inqWasdaRes.data;
+    console.log('RAW WASDA DATA:', d);
     assert.strictEqual(d.idpel, '01002676');
     assert.strictEqual(d.nominal, 294500, 'Nominal must match 294500');
     assert.strictEqual(d.admin, 10806, 'Admin must match 10806');
     assert.strictEqual(d.total_bayar, 305306, 'Total must match 305306');
-    assert.ok(Array.isArray(d.data_bill) && d.data_bill.length > 0, 'data_bill present');
-    assert.ok(d.data_bill[0].blth.startsWith('blth'), 'data_bill entries use blth keys');
-    for (const b of d.data_bill) {
+    assert.ok(typeof d.data_bill === 'object' && !Array.isArray(d.data_bill), 'data_bill is an object map');
+    assert.ok(d.data_bill.blth1, 'data_bill contains blth1');
+    assert.ok(d.nomet, 'nomet is present');
+    for (const [key, b] of Object.entries(d.data_bill)) {
+      assert.ok(key.startsWith('blth'), 'key starts with blth');
       assert.ok(typeof b.air === 'number' && typeof b.denda === 'number', 'bill amounts numeric');
       assert.ok(b.bulan && b.tahun, 'bill period present');
+      assert.ok(typeof b.meter_awal === 'number' && typeof b.meter_akhir === 'number', 'meter_awal/akhir numeric');
     }
     assert.ok(d.ref2, 'ref2 must be returned for payment');
-    console.log('✓ WASDA inquiry spec-shaped:', { total: d.total_bayar, bills: d.data_bill.length, ref2: d.ref2 });
+    console.log('✓ WASDA inquiry spec-shaped:', { total: d.total_bayar, bills: Object.keys(d.data_bill).length, ref2: d.ref2 });
 
     console.log('\n[TEST 4] POST /api/inquiry (PDAM Bondowoso - WABONDO)');
     const inqWabondoRes = await fetch(`${baseUrl}/api/inquiry`, {
@@ -93,8 +97,9 @@ async function runTests() {
     assert.strictEqual(w.nominal, 94130);
     assert.strictEqual(w.admin, 7500);
     assert.strictEqual(w.total_bayar, 101630);
-    const nonair = w.data_bill.reduce((a, b) => a + b.nonair, 0);
-    const meter = w.data_bill.reduce((a, b) => a + Math.max(0, b.meterAkhir - b.meterAwal), 0);
+    const billsList = Object.values(w.data_bill);
+    const nonair = billsList.reduce((a, b) => a + b.nonair, 0);
+    const meter = billsList.reduce((a, b) => a + Math.max(0, b.meter_akhir - b.meter_awal), 0);
     assert.ok(nonair > 0, 'WABONDO has non-air charges');
     assert.ok(meter > 0, 'WABONDO has meter usage');
     console.log('✓ WABONDO inquiry:', { total: w.total_bayar, nonair, meter });
@@ -175,9 +180,11 @@ async function runTests() {
     console.log('✓ Receipt download + 404 path verified');
 
     console.log('\n=== ALL 8 INTEGRATION TESTS PASSED ===');
+  } catch (err) {
+    console.error('TEST ERROR:', err);
+    process.exitCode = 1;
   } finally {
     server.close();
-    process.exit(0);
   }
 }
 

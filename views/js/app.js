@@ -407,9 +407,9 @@
       document.getElementById("res-customer-name").textContent = data.nama || "-";
       document.getElementById("res-customer-address").textContent = data.alamat || "-";
       document.getElementById("res-bill-count").textContent = `${data.jumlah_bulan} Bulan Tagihan`;
-      const bills = data.data_bill || [];
+      const bills = data.data_bill ? Array.isArray(data.data_bill) ? data.data_bill : Object.values(data.data_bill) : [];
       const hasNonair = bills.some((b) => b.nonair > 0);
-      const hasMeter = bills.some((b) => b.meterAkhir > 0 || b.meterAwal > 0);
+      const hasMeter = bills.some((b) => b.meter_akhir > 0 || b.meter_awal > 0);
       const toggleDisplay = (id, show, style = "") => {
         const el = document.getElementById(id);
         if (el) el.style.display = show ? style : "none";
@@ -421,7 +421,7 @@
       tbody.innerHTML = "";
       bills.forEach((bill) => {
         const tr = document.createElement("tr");
-        const meter = bill.meterAkhir - bill.meterAwal;
+        const meter = bill.meter_akhir - bill.meter_awal;
         const monthIdx = parseInt(bill.bulan, 10) - 1;
         const MONTHS = [
           "JAN",

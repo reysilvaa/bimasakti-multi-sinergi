@@ -405,9 +405,13 @@ class PdamApp {
     document.getElementById("res-bill-count")!.textContent =
       `${data.jumlah_bulan} Bulan Tagihan`;
 
-    const bills: SpecBill[] = data.data_bill || [];
+    const bills: SpecBill[] = data.data_bill
+      ? Array.isArray(data.data_bill)
+        ? data.data_bill
+        : Object.values(data.data_bill)
+      : [];
     const hasNonair = bills.some((b) => b.nonair > 0);
-    const hasMeter = bills.some((b) => b.meterAkhir > 0 || b.meterAwal > 0);
+    const hasMeter = bills.some((b) => b.meter_akhir > 0 || b.meter_awal > 0);
 
     const toggleDisplay = (id: string, show: boolean, style: string = "") => {
       const el = document.getElementById(id);
@@ -422,7 +426,7 @@ class PdamApp {
 
     bills.forEach((bill) => {
       const tr = document.createElement("tr");
-      const meter = bill.meterAkhir - bill.meterAwal;
+      const meter = bill.meter_akhir - bill.meter_awal;
       const monthIdx = parseInt(bill.bulan, 10) - 1;
       const MONTHS = [
         "JAN",

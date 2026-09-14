@@ -16,19 +16,21 @@ function toInquiryData(
   raw: RajabillerRawResponse,
   sentRef1: string,
 ): InquiryData {
-  const bills: SpecBill[] = extractBills(raw);
+  const bills = extractBills(raw);
   const nominal = toInt(raw.nominal);
   const admin = toInt(raw.biayaadmin);
+  const nomet = raw.nometer || "";
 
   return {
     idpel: raw.customerid1 || raw.idpelanggan1 || "",
-    nometer: raw.nometer || "",
+    nomet,
+    nometer: nomet,
     alamat: raw.customeraddress || "",
     nama: raw.customername || "",
     nominal,
     admin,
     total_bayar: nominal + admin,
-    jumlah_bulan: raw.billquantity || String(bills.length),
+    jumlah_bulan: raw.billquantity || String(Object.keys(bills).length),
     data_bill: bills,
     ref1: raw.ref1 || sentRef1,
     ref2: raw.ref2 || "",
@@ -140,13 +142,14 @@ export class RajabillerService {
       );
     }
 
-    const bills = extractBills(raw);
+    const billsMap = extractBills(raw);
+    const bills = Object.values(billsMap);
     const nominalValue = toInt(raw.nominal);
     const adminFee = toInt(raw.biayaadmin);
     const penalty = bills.reduce((acc, b) => acc + b.denda, 0);
     const miscFee = bills.reduce((acc, b) => acc + b.nonair, 0);
     const meterUsage = bills.reduce(
-      (acc, b) => acc + Math.max(0, b.meterAkhir - b.meterAwal),
+      (acc, b) => acc + Math.max(0, b.meter_akhir - b.meter_awal),
       0,
     );
     const totalAmount = nominalValue + adminFee;

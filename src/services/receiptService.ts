@@ -35,22 +35,23 @@ export function toSpecBill(
     : toInt(miscStr);
 
   return {
-    blth: `blth${i}`,
     air: toInt(airStr),
     denda: toInt(raw[`penalty${i}`]),
     nonair,
-    meterAwal: toInt(raw[`firstmeterread${i}`]),
-    meterAkhir: toInt(raw[`lastmeterread${i}`]),
+    meter_awal: toInt(raw[`firstmeterread${i}`]),
+    meter_akhir: toInt(raw[`lastmeterread${i}`]),
     bulan,
     tahun: tahunRaw.length === 2 ? `20${tahunRaw}` : tahunRaw,
   };
 }
 
-export function extractBills(raw: RajabillerRawResponse): SpecBill[] {
-  const bills: SpecBill[] = [];
+export function extractBills(
+  raw: RajabillerRawResponse,
+): Record<string, SpecBill> {
+  const bills: Record<string, SpecBill> = {};
   for (let i = 1; i <= 6; i++) {
     const bill = toSpecBill(raw, i);
-    if (bill) bills.push(bill);
+    if (bill) bills[`blth${i}`] = bill;
   }
   return bills;
 }
@@ -77,7 +78,8 @@ export function generateReceiptText(tx: TransactionRecord): string {
     raw = JSON.parse(tx.rawResponse);
   } catch {}
 
-  const bills = raw ? extractBills(raw) : [];
+  const billsMap = raw ? extractBills(raw) : {};
+  const bills = Object.values(billsMap);
   const pdamName =
     tx.pdamName || SUPPORTED_PRODUCTS[tx.productCode]?.name || "PDAM";
   const billLines =

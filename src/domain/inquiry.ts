@@ -1,26 +1,26 @@
 import { z } from "zod";
 
 export const specBillSchema = z.object({
-  blth: z.string(),
   air: z.number().int(),
   denda: z.number().int(),
   nonair: z.number().int(),
-  meterAwal: z.number().int(),
-  meterAkhir: z.number().int(),
+  meter_awal: z.number().int(),
+  meter_akhir: z.number().int(),
   bulan: z.string(),
   tahun: z.string(),
 });
 
 export const inquiryDataSchema = z.object({
   idpel: z.string(),
-  nometer: z.string(),
+  nomet: z.string(),
+  nometer: z.string().optional(),
   alamat: z.string(),
-  nama: z.string(),
+  nama: z.string().optional(),
   nominal: z.number().int(),
   admin: z.number().int(),
   total_bayar: z.number().int(),
   jumlah_bulan: z.string(),
-  data_bill: z.array(specBillSchema),
+  data_bill: z.record(z.string(), specBillSchema),
   ref1: z.string(),
   ref2: z.string(),
 });
