@@ -6,4 +6,6 @@ data/*.sqlite-*
 views/**/*.br
 views/**/*.gz
 views/**/*.zst
+views/js/app.js
+views/js/*.map
 public/

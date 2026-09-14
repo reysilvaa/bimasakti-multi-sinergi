@@ -8,6 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "clean": "node scripts/clean.mjs",
     "clean:dist": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
     "build:client": "esbuild src/views/main.tsx --bundle --outfile=views/js/app.js --format=iife --target=es2020 --jsx=automatic --jsx-import-source=preact",
     "build": "node scripts/build.mjs",

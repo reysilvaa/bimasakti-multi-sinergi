@@ -181,7 +181,7 @@ export function App() {
             <section id="section-payment">
               <FlowStepper hasInquiry={!!inquiryData} />
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
                 <InquiryForm
                   products={products}
                   selectedProduct={selectedProduct}

@@ -21,7 +21,7 @@ export function InquiryForm({
   isLoading,
 }: InquiryFormProps) {
   return (
-    <div className="lg:col-span-5 space-y-5">
+    <div className="lg:col-span-5 flex flex-col gap-5 h-full">
       <Card className="p-6">
         <div className="flex items-center gap-2.5 pb-4 border-b border-black/[0.05]">
           <span className="w-6 h-6 rounded-full bg-accent-50 text-accent-600 flex items-center justify-center text-xs font-bold">
@@ -82,7 +82,7 @@ export function InquiryForm({
       </Card>
 
       {/* Preset Cards */}
-      <Card className="p-5">
+      <Card className="p-5 flex-1 flex flex-col justify-start">
         <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-800/40 mb-3">
           ID Pelanggan Contoh
         </p>
