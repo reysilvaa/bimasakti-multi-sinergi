@@ -29,60 +29,91 @@ function toRecord(row: typeof transactions.$inferSelect): TransactionRecord {
   };
 }
 
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delayMs = 250,
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      lastError = err;
+      if (attempt < retries) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayMs * (attempt + 1)),
+        );
+      }
+    }
+  }
+  throw lastError;
+}
+
 export class TransactionRepository {
   public static async create(
     data: NewTransactionRow,
   ): Promise<TransactionRecord> {
-    const db = getDatabase();
-    const result = await db.insert(transactions).values(data);
-    const insertedId = Number(result[0].insertId);
-    const fetched = await TransactionRepository.findById(insertedId);
-    if (!fetched) {
-      throw new Error("Failed to retrieve created transaction");
-    }
-    return fetched;
+    return withRetry(async () => {
+      const db = getDatabase();
+      const result = await db.insert(transactions).values(data);
+      const insertedId = Number(result[0].insertId);
+      const fetched = await TransactionRepository.findById(insertedId);
+      if (!fetched) {
+        throw new Error("Failed to retrieve created transaction");
+      }
+      return fetched;
+    });
   }
 
   public static async findAll(
     limit: number = 100,
   ): Promise<TransactionRecord[]> {
-    const db = getDatabase();
-    const rows = await db
-      .select()
-      .from(transactions)
-      .orderBy(desc(transactions.id))
-      .limit(limit);
-    return rows.map(toRecord);
+    return withRetry(async () => {
+      const db = getDatabase();
+      const rows = await db
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.id))
+        .limit(limit);
+      return rows.map(toRecord);
+    });
   }
 
   public static async findById(id: number): Promise<TransactionRecord | null> {
-    const db = getDatabase();
-    const rows = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.id, id))
-      .limit(1);
-    return rows[0] ? toRecord(rows[0]) : null;
+    return withRetry(async () => {
+      const db = getDatabase();
+      const rows = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.id, id))
+        .limit(1);
+      return rows[0] ? toRecord(rows[0]) : null;
+    });
   }
 
   public static async findByRef2(
     ref2: string,
   ): Promise<TransactionRecord | null> {
-    const db = getDatabase();
-    const rows = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.ref2, ref2))
-      .orderBy(desc(transactions.id))
-      .limit(1);
-    return rows[0] ? toRecord(rows[0]) : null;
+    return withRetry(async () => {
+      const db = getDatabase();
+      const rows = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.ref2, ref2))
+        .orderBy(desc(transactions.id))
+        .limit(1);
+      return rows[0] ? toRecord(rows[0]) : null;
+    });
   }
 
   public static async count(): Promise<number> {
-    const db = getDatabase();
-    const rows = await db
-      .select({ value: sql<number>`count(*)` })
-      .from(transactions);
-    return Number(rows[0]?.value ?? 0);
+    return withRetry(async () => {
+      const db = getDatabase();
+      const rows = await db
+        .select({ value: sql<number>`count(*)` })
+        .from(transactions);
+      return Number(rows[0]?.value ?? 0);
+    });
   }
 }
