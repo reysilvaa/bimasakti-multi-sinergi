@@ -1,8 +1,8 @@
 import type { Product } from "@/views/utils.js";
 
 interface SidebarProps {
-  currentTab: "inquiry" | "history" | "docs";
-  onSelectTab: (tab: "inquiry" | "history" | "docs") => void;
+  currentTab: "inquiry" | "history" | "docs" | "readme";
+  onSelectTab: (tab: "inquiry" | "history" | "docs" | "readme") => void;
   products: Product[];
   onSelectProduct: (code: string, idpel: string) => void;
 }
@@ -117,6 +117,29 @@ export function Sidebar({
             />
           </svg>
           <span>Dokumentasi API</span>
+        </button>
+        <button
+          type="button"
+          id="nav-readme-btn"
+          onClick={() => onSelectTab("readme")}
+          className={`w-full flex items-center gap-2.5 px-3 h-10 rounded-xl text-[13px] font-semibold transition-all ${
+            currentTab === "readme"
+              ? "bg-ink-950 text-white shadow-sm"
+              : "text-ink-800/60 hover:text-ink-900 hover:bg-black/[0.04]"
+          }`}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+          >
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          <span>Panduan & README</span>
         </button>
       </nav>
 

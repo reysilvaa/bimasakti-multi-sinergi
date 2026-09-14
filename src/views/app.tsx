@@ -15,15 +15,53 @@ import { HistoryTable } from "@/views/components/history.table.js";
 import { InquiryForm } from "@/views/components/inquiry.form.js";
 import { InquiryResult } from "@/views/components/inquiry.result.js";
 import { PaymentConfirmModal } from "@/views/components/payment.confirm.modal.js";
+import { ReadmeViewer } from "@/views/components/readme.viewer.js";
 import { ReceiptModal } from "@/views/components/receipt.modal.js";
 import { Sidebar } from "@/views/components/sidebar.js";
 import { type AlertState, Toast } from "@/views/components/toast.js";
 import type { Product } from "@/views/utils.js";
 
+function getInitialTab(): "inquiry" | "history" | "docs" | "readme" {
+  if (typeof window === "undefined") return "inquiry";
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get("tab");
+  if (
+    tab === "readme" ||
+    window.location.pathname === "/readme" ||
+    window.location.hash === "#readme"
+  ) {
+    return "readme";
+  }
+  if (
+    tab === "docs" ||
+    window.location.pathname === "/docs" ||
+    window.location.hash === "#docs"
+  ) {
+    return "docs";
+  }
+  if (
+    tab === "history" ||
+    window.location.pathname === "/history" ||
+    window.location.hash === "#history"
+  ) {
+    return "history";
+  }
+  return "inquiry";
+}
+
 export function App() {
-  const [currentTab, setCurrentTab] = useState<"inquiry" | "history" | "docs">(
-    "inquiry",
-  );
+  const [currentTab, setCurrentTab] = useState<
+    "inquiry" | "history" | "docs" | "readme"
+  >(getInitialTab);
+
+  const handleSelectTab = (tab: "inquiry" | "history" | "docs" | "readme") => {
+    setCurrentTab(tab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", tab);
+      window.history.replaceState(null, "", url.toString());
+    }
+  };
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [customerId, setCustomerId] = useState<string>("");
@@ -168,7 +206,7 @@ export function App() {
     <div className="flex min-h-screen">
       <Sidebar
         currentTab={currentTab}
-        onSelectTab={setCurrentTab}
+        onSelectTab={handleSelectTab}
         products={products}
         onSelectProduct={(code, idpel) => {
           setSelectedProduct(code);
@@ -222,6 +260,10 @@ export function App() {
           )}
 
           {currentTab === "docs" && <ApiDocs />}
+
+          {currentTab === "readme" && (
+            <ReadmeViewer onNavigateToApp={() => handleSelectTab("inquiry")} />
+          )}
         </main>
 
         <footer className="print:hidden border-t border-black/[0.05] py-4 px-6 text-center text-xs text-ink-800/35">
