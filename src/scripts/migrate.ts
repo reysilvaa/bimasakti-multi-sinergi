@@ -21,7 +21,6 @@ async function loadMigratorDb(database: string) {
       `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
     );
   } catch {
-    // Hosted environments like FreeDB may restrict CREATE DATABASE; ignore if db exists
   }
   await connection.query(`USE \`${database}\``);
   return drizzle(connection);
