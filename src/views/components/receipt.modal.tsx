@@ -33,22 +33,23 @@ export function ReceiptModal({
     : "struk_pembayaran.txt";
 
   const handlePrint = () => {
-    let iframe = document.getElementById(
+    let existingFrame = document.getElementById(
       "receipt-print-frame",
     ) as HTMLIFrameElement | null;
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.id = "receipt-print-frame";
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "0";
-      document.body.appendChild(iframe);
+    if (!existingFrame) {
+      existingFrame = document.createElement("iframe");
+      existingFrame.id = "receipt-print-frame";
+      existingFrame.style.position = "fixed";
+      existingFrame.style.right = "0";
+      existingFrame.style.bottom = "0";
+      existingFrame.style.width = "0";
+      existingFrame.style.height = "0";
+      existingFrame.style.border = "0";
+      document.body.appendChild(existingFrame);
     }
-    const doc = iframe.contentWindow?.document;
-    if (doc) {
+    const frameWindow = existingFrame.contentWindow;
+    const doc = frameWindow?.document;
+    if (frameWindow && doc) {
       doc.open();
       doc.write(`<!DOCTYPE html>
 <html lang="id">
@@ -79,9 +80,9 @@ export function ReceiptModal({
 <body><div class="receipt-container">${receiptText}</div></body>
 </html>`);
       doc.close();
-      iframe.contentWindow?.focus();
+      frameWindow.focus();
       setTimeout(() => {
-        iframe.contentWindow?.print();
+        frameWindow.print();
       }, 150);
     } else {
       window.print();
