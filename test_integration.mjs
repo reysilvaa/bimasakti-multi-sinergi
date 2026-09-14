@@ -183,7 +183,7 @@ async function runTests() {
     assert.strictEqual(notFound.status, 404, 'Missing transaction must 404');
     console.log('✓ Receipt download + 404 path verified');
 
-    console.log('\n[TEST 9] GET / (EJS view engine + modular components)');
+    console.log('\n[TEST 9] GET / (Static SPA + Preact components mount target)');
     const htmlRes = await fetch(`${baseUrl}/`);
     assert.strictEqual(htmlRes.status, 200, 'Page status 200');
     assert.ok(htmlRes.headers.get('content-type').includes('text/html'), 'Content-type is HTML');
@@ -191,7 +191,7 @@ async function runTests() {
     assert.ok(htmlText.includes('id="form-inquiry"'), 'Includes inquiry-form component');
     assert.ok(htmlText.includes('id="receipt-modal"'), 'Includes modal component');
     assert.ok(htmlText.includes('id="section-history"'), 'Includes history component');
-    console.log('✓ EJS layout & shadcn-like components rendered cleanly');
+    console.log('✓ SPA HTML shell & component targets rendered cleanly');
 
     console.log('\n=== ALL 9 INTEGRATION TESTS PASSED ===');
     process.exit(0);

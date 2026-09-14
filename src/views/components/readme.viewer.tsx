@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
 import { Marked, type Tokens } from "marked";
-import { Button, Card } from "@/views/components/ui/index.js";
+import { useEffect, useMemo, useState } from "preact/hooks";
+import { Button, Card, LoadingSpinner } from "@/views/components/ui/index.js";
 import defaultReadmeContent from "../../../README.md";
 
 interface TocItem {
@@ -51,7 +51,11 @@ md.use({
       if (href.includes("shields.io") || href.includes("/badge/")) {
         return `<img src="${href}" alt="${text || ""}" class="inline-block h-5 align-middle mr-1.5 my-1" />`;
       }
-      if (!href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("/")) {
+      if (
+        !href.startsWith("http://") &&
+        !href.startsWith("https://") &&
+        !href.startsWith("/")
+      ) {
         href = `/${href.replace(/^\.\//, "")}`;
       }
       return `<figure class="my-6 text-center"><img src="${href}" alt="${text || ""}" class="rounded-xl border border-black/[0.08] shadow-md max-w-full h-auto mx-auto cursor-pointer hover:opacity-95 transition-opacity bg-white p-4" onclick="window.__openImageModal&&window.__openImageModal('${href}')" />${text ? `<figcaption class="text-xs text-ink-800/50 mt-2 italic">${text}</figcaption>` : ""}</figure>`;
@@ -67,7 +71,8 @@ md.use({
         body += this.listitem(item);
       }
       const tag = token.ordered ? "ol" : "ul";
-      const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : "";
+      const startAttr =
+        token.ordered && token.start !== 1 ? ` start="${token.start}"` : "";
       const cls = token.ordered
         ? "my-3 space-y-1 pl-5 list-decimal marker:text-ink-400"
         : "my-3 space-y-1 pl-5 list-disc marker:text-ink-400";
@@ -117,7 +122,9 @@ md.use({
     },
 
     link(token: Tokens.Link) {
-      const content = token.tokens ? this.parser.parseInline(token.tokens) : token.text;
+      const content = token.tokens
+        ? this.parser.parseInline(token.tokens)
+        : token.text;
       return `<a href="${token.href}" target="_blank" rel="noreferrer" class="text-accent-600 hover:text-accent-700 font-semibold underline decoration-accent-500/30 hover:decoration-accent-600 transition-colors">${content}</a>`;
     },
   },
@@ -141,7 +148,7 @@ export function ReadmeViewer({
       m.initialize({
         startOnLoad: false,
         theme: "neutral",
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontFamily: "Inter, system-ui, -apple-system, sans-serif",
         flowchart: {
           curve: "linear",
           htmlLabels: true,
@@ -153,7 +160,9 @@ export function ReadmeViewer({
 
     const existing = document.getElementById("mermaid-cdn");
     if (existing) {
-      const w = window as unknown as { mermaid?: { initialize: (c: object) => void } };
+      const w = window as unknown as {
+        mermaid?: { initialize: (c: object) => void };
+      };
       if (w.mermaid) {
         initMermaid(w.mermaid);
         setMermaidReady(true);
@@ -169,7 +178,9 @@ export function ReadmeViewer({
     s.id = "mermaid-cdn";
     s.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
     s.onload = () => {
-      const w = window as unknown as { mermaid?: { initialize: (c: object) => void } };
+      const w = window as unknown as {
+        mermaid?: { initialize: (c: object) => void };
+      };
       if (w.mermaid) initMermaid(w.mermaid);
       setMermaidReady(true);
     };
@@ -185,7 +196,9 @@ export function ReadmeViewer({
 
   const handleDownload = () => {
     const a = Object.assign(document.createElement("a"), {
-      href: URL.createObjectURL(new Blob([content], { type: "text/markdown;charset=utf-8" })),
+      href: URL.createObjectURL(
+        new Blob([content], { type: "text/markdown;charset=utf-8" }),
+      ),
       download: "README.md",
     });
     document.body.appendChild(a);
@@ -203,7 +216,10 @@ export function ReadmeViewer({
       const raw = m2?.[1] ?? m3?.[1];
       if (!raw) continue;
       const text = raw.replace(/[*`_]/g, "").trim();
-      const id = text.toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "");
+      const id = text
+        .toLowerCase()
+        .replace(/[^\w]+/g, "-")
+        .replace(/^-|-$/g, "");
       items.push({ id, text, level: m2 ? 2 : 3 });
     }
     return items;
@@ -217,9 +233,12 @@ export function ReadmeViewer({
 
   // Hook image modal to window
   useEffect(() => {
-    (window as unknown as { __openImageModal?: (u: string) => void }).__openImageModal = setSelectedImage;
+    (
+      window as unknown as { __openImageModal?: (u: string) => void }
+    ).__openImageModal = setSelectedImage;
     return () => {
-      delete (window as unknown as { __openImageModal?: (u: string) => void }).__openImageModal;
+      delete (window as unknown as { __openImageModal?: (u: string) => void })
+        .__openImageModal;
     };
   }, []);
 
@@ -227,11 +246,17 @@ export function ReadmeViewer({
   useEffect(() => {
     if (!mermaidReady || !renderedHtml) return;
     const tid = setTimeout(() => {
-      const w = window as unknown as { mermaid?: { run: (o: object) => Promise<void> } };
+      const w = window as unknown as {
+        mermaid?: { run: (o: object) => Promise<void> };
+      };
       if (!w.mermaid) return;
-      const nodes = Array.from(document.querySelectorAll(".readme-prose .mermaid"));
+      const nodes = Array.from(
+        document.querySelectorAll(".readme-prose .mermaid"),
+      );
       if (!nodes.length) return;
-      nodes.forEach((n) => n.removeAttribute("data-processed"));
+      nodes.forEach((n) => {
+        n.removeAttribute("data-processed");
+      });
       w.mermaid.run({ nodes }).catch(() => {});
     }, 80);
     return () => clearTimeout(tid);
@@ -244,37 +269,76 @@ export function ReadmeViewer({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-ink-950">
-              Dokumentasi Resmi Proyek (README.md)
+              Dokumentasi (README.md)
             </h2>
             <span className="px-2 py-0.5 rounded-full bg-accent-50 text-accent-700 text-[10px] font-bold">
               Rev 2.1.3
             </span>
           </div>
           <p className="text-xs text-ink-800/50 mt-1">
-            Format render interaktif, lengkap dengan arsitektur, daftar produk, dan panduan teknis
+            Format lengkap dengan arsitektur, daftar produk, dan panduan teknis
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {onNavigateToApp && (
-            <Button type="button" variant="primary" size="sm" onClick={onNavigateToApp} className="gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={onNavigateToApp}
+              className="gap-2"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
               Buka Gateway Pembayaran
             </Button>
           )}
 
-          <Button type="button" variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            className="gap-1.5"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
             {copied ? "Tersalin!" : "Salin Raw"}
           </Button>
 
-          <Button type="button" variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            className="gap-1.5"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
@@ -290,8 +354,12 @@ export function ReadmeViewer({
         <div className="hidden lg:block lg:col-span-3 sticky top-24">
           <Card className="p-4 border-black/[0.06] bg-mist-50/40">
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-black/[0.06]">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-800/60">Daftar Isi</span>
-              <span className="text-[10px] text-accent-600 font-mono font-semibold">{toc.length} Bagian</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-800/60">
+                Daftar Isi
+              </span>
+              <span className="text-[10px] text-accent-600 font-mono font-semibold">
+                {toc.length} Bagian
+              </span>
             </div>
             <nav className="space-y-1 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 text-xs">
               {toc.map((item) => (
@@ -313,11 +381,14 @@ export function ReadmeViewer({
             {content ? (
               <div
                 className="readme-prose prose max-w-none text-ink-900"
-                // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized & internal README viewer
                 dangerouslySetInnerHTML={{ __html: renderedHtml }}
               />
             ) : (
-              <p className="text-sm text-ink-800/40 animate-pulse">Memuat dokumentasi…</p>
+              <LoadingSpinner
+                title="Memuat dokumentasi…"
+                subtitle="Menyiapkan viewer dan memproses markdown"
+                className="min-h-[300px]"
+              />
             )}
           </Card>
         </div>

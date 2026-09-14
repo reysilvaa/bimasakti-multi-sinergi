@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  LoadingSpinner,
   Table,
   TableBody,
   TableCell,
@@ -53,38 +54,12 @@ export function InquiryResult({
       <div className="lg:col-span-7 flex flex-col h-full">
         <Card
           id="inquiry-loading-state"
-          className="p-12 text-center animate-card-in flex-1 flex flex-col items-center justify-center h-full min-h-[360px]"
+          className="p-8 text-center animate-card-in flex-1 flex flex-col items-center justify-center h-full min-h-[360px]"
         >
-          <div className="w-12 h-12 mx-auto rounded-full bg-accent-50 text-accent-600 flex items-center justify-center mb-4">
-            <svg
-              className="animate-spin"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="9.5"
-                stroke="currentColor"
-                strokeOpacity="0.2"
-                strokeWidth="2.5"
-              />
-              <path
-                d="M21.5 12A9.5 9.5 0 0 0 12 2.5"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <p className="text-sm font-bold text-ink-900">
-            Menghubungi Server PDAM…
-          </p>
-          <p className="text-xs text-ink-800/40 mt-1">
-            Mengambil rincian tagihan terbaru
-          </p>
+          <LoadingSpinner
+            title="Menghubungi Server PDAM…"
+            subtitle="Mengambil rincian tagihan terbaru"
+          />
         </Card>
       </div>
     );
