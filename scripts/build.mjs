@@ -137,5 +137,8 @@ for (const relPath of assetsToCompress) {
   }
 }
 
+// 6. Sync to public directory for Vercel
+fs.cpSync("views", "public", { recursive: true });
+
 const elapsed = (performance.now() - startTime).toFixed(1);
 console.log(`✓ Optimized build & multi-compression (zstd/br/gz) completed in ${elapsed}ms`);

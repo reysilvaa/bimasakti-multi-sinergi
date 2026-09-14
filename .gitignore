@@ -6,3 +6,4 @@ data/*.sqlite-*
 views/**/*.br
 views/**/*.gz
 views/**/*.zst
+public/
