@@ -27,7 +27,7 @@
 
 ### Diagram Sistem (Scope Tes Full Stack)
 
-![Diagram Sistem (Scope Tes Full Stack)](image.png)
+![Diagram Sistem (Scope Tes Full Stack)](views/images/architecture.png)
 
 ### Alur Internal Request
 
