@@ -6,6 +6,7 @@ import type {
   RajabillerRequest,
 } from "../domain/rajabiller.js";
 import { RC } from "../domain/protocol.js";
+import { ApiError } from "../domain/errors.js";
 import type { TransactionRecord } from "../domain/transaction.js";
 import { toInt } from "../utils/helpers.js";
 import { terbilang } from "../utils/terbilang.js";
@@ -48,19 +49,17 @@ async function sendRajabillerRequest(
   });
 
   if (!response.ok) {
-    throw Object.assign(
-      new Error(
-        `Rajabiller HTTP Error: ${response.status} ${response.statusText}`,
-      ),
-      { rc: RC.INTERNAL_ERROR },
+    throw new ApiError(
+      RC.INTERNAL_ERROR,
+      `Rajabiller HTTP Error: ${response.status} ${response.statusText}`,
     );
   }
 
   const raw = (await response.json()) as RajabillerRawResponse;
   if (raw.status !== RC.SUCCESS && opts?.throwOnBusinessError !== false) {
-    throw Object.assign(
-      new Error(raw.keterangan || "Rajabiller request failed"),
-      { rc: raw.status },
+    throw new ApiError(
+      raw.status,
+      raw.keterangan || "Rajabiller request failed",
     );
   }
   return raw;
@@ -135,11 +134,9 @@ export class RajabillerService {
 
     const isSuccess = raw.status === RC.SUCCESS;
     if (!isSuccess && raw.status !== RC.ALREADY_PAID) {
-      throw Object.assign(
-        new Error(
-          raw.keterangan || "Pembayaran gagal diproses oleh Rajabiller.",
-        ),
-        { rc: raw.status },
+      throw new ApiError(
+        raw.status,
+        raw.keterangan || "Pembayaran gagal diproses oleh Rajabiller.",
       );
     }
 

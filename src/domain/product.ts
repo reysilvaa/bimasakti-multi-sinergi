@@ -1,20 +1,22 @@
 import { z } from "zod";
 
-export const pdamProductCodeSchema = z.enum(["WASDA", "WABONDO"]);
-export type PdamProductCode = z.infer<typeof pdamProductCodeSchema>;
+export interface PdamProduct {
+  name: string;
+  defaultIdpel: string;
+}
 
-export const pdamProductSchema = z.object({
-  name: z.string(),
-  defaultIdpel: z.string(),
-});
-export type PdamProduct = z.infer<typeof pdamProductSchema>;
-
-export const SUPPORTED_PRODUCTS: Record<PdamProductCode, PdamProduct> = {
+export const SUPPORTED_PRODUCTS = {
   WASDA: { name: "PDAM SIDOARJO", defaultIdpel: "01002676" },
   WABONDO: { name: "PDAM BONDOWOSO", defaultIdpel: "09000879" },
-};
+} as const satisfies Record<string, PdamProduct>;
 
-z.record(pdamProductCodeSchema, pdamProductSchema).parse(SUPPORTED_PRODUCTS);
+export type PdamProductCode = keyof typeof SUPPORTED_PRODUCTS;
+
+const productCodes = Object.keys(SUPPORTED_PRODUCTS) as [
+  PdamProductCode,
+  ...PdamProductCode[],
+];
+export const pdamProductCodeSchema = z.enum(productCodes);
 
 export function isSupportedProduct(code: unknown): code is PdamProductCode {
   return pdamProductCodeSchema.safeParse(code).success;

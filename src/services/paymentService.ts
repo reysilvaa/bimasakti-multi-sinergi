@@ -1,7 +1,5 @@
-import { DuplicatePaymentError } from "../domain/errors.js";
-import { isSupportedProduct } from "../domain/product.js";
+import { isSupportedProduct, type PdamProductCode } from "../domain/product.js";
 import { RC } from "../domain/protocol.js";
-import type { PdamProductCode } from "../domain/product.js";
 import type { TransactionRecord } from "../domain/transaction.js";
 import { TransactionRepository } from "../repository/transaction.repository.js";
 import { ApiError } from "../domain/errors.js";
@@ -34,7 +32,11 @@ export class PaymentService {
 
     const existing = await TransactionRepository.findByRef2(input.ref2);
     if (existing) {
-      throw new DuplicatePaymentError(existing, generateReceiptText(existing));
+      throw new ApiError(
+        RC.ALREADY_PAID,
+        "Tagihan sudah dibayar sebelumnya (idempoten).",
+        { transaction: existing, receiptText: generateReceiptText(existing) },
+      );
     }
 
     const result = await RajabillerService.executePayment({
@@ -61,7 +63,11 @@ export class PaymentService {
       if (err && (err.code === "ER_DUP_ENTRY" || err.errno === 1062)) {
         const stored = await TransactionRepository.findByRef2(input.ref2);
         if (stored) {
-          throw new DuplicatePaymentError(stored, generateReceiptText(stored));
+          throw new ApiError(
+            RC.ALREADY_PAID,
+            "Tagihan sudah dibayar sebelumnya (idempoten).",
+            { transaction: stored, receiptText: generateReceiptText(stored) },
+          );
         }
       }
       throw err;

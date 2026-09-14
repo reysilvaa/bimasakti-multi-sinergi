@@ -1,5 +1,4 @@
 import { RC } from "./protocol.js";
-import type { TransactionRecord } from "./transaction.js";
 
 export class ApiError extends Error {
   public readonly rc: string;
@@ -19,20 +18,5 @@ export class ApiError extends Error {
       typeof rc === "string" ? rc : RC.INTERNAL_ERROR,
       (err instanceof Error && err.message) || "Terjadi kesalahan internal.",
     );
-  }
-}
-
-export class DuplicatePaymentError extends ApiError {
-  public readonly transaction: TransactionRecord;
-  public readonly receiptText: string;
-
-  constructor(transaction: TransactionRecord, receiptText: string) {
-    super(RC.ALREADY_PAID, "Tagihan sudah dibayar sebelumnya (idempoten).", {
-      transaction,
-      receiptText,
-    });
-    this.name = "DuplicatePaymentError";
-    this.transaction = transaction;
-    this.receiptText = receiptText;
   }
 }
