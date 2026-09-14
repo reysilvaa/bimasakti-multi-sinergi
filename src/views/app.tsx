@@ -8,6 +8,7 @@ import {
   requestInquiry,
   requestPayment,
 } from "@/views/api/pdam.api.js";
+import { ApiDocs } from "@/views/components/api.docs.js";
 import { FlowStepper } from "@/views/components/flow.stepper.js";
 import { Header } from "@/views/components/header.js";
 import { HistoryTable } from "@/views/components/history.table.js";
@@ -19,7 +20,7 @@ import { type AlertState, Toast } from "@/views/components/toast.js";
 import type { Product } from "@/views/utils.js";
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<"inquiry" | "history">(
+  const [currentTab, setCurrentTab] = useState<"inquiry" | "history" | "docs">(
     "inquiry",
   );
   const [products, setProducts] = useState<Product[]>([]);
@@ -176,7 +177,7 @@ export function App() {
         <Toast alert={alert} onClose={() => setAlert(null)} />
 
         <main className="flex-grow w-full max-w-6xl mx-auto px-6 py-6">
-          {currentTab === "inquiry" ? (
+          {currentTab === "inquiry" && (
             <section id="section-payment">
               <FlowStepper hasInquiry={!!inquiryData} />
 
@@ -201,7 +202,9 @@ export function App() {
                 />
               </div>
             </section>
-          ) : (
+          )}
+
+          {currentTab === "history" && (
             <HistoryTable
               records={transactions}
               products={products}
@@ -213,6 +216,8 @@ export function App() {
               onViewReceipt={handleViewReceipt}
             />
           )}
+
+          {currentTab === "docs" && <ApiDocs />}
         </main>
 
         <footer className="print:hidden border-t border-black/[0.05] py-4 px-6 text-center text-xs text-ink-800/35">

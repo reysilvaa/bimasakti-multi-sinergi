@@ -1,8 +1,8 @@
 import type { Product } from "@/views/utils.js";
 
 interface SidebarProps {
-  currentTab: "inquiry" | "history";
-  onSelectTab: (tab: "inquiry" | "history") => void;
+  currentTab: "inquiry" | "history" | "docs";
+  onSelectTab: (tab: "inquiry" | "history" | "docs") => void;
   products: Product[];
   onSelectProduct: (code: string, idpel: string) => void;
 }
@@ -90,6 +90,33 @@ export function Sidebar({
             />
           </svg>
           <span>Riwayat Transaksi</span>
+        </button>
+
+        <button
+          type="button"
+          id="nav-docs-btn"
+          onClick={() => onSelectTab("docs")}
+          className={`w-full flex items-center gap-2.5 px-3 h-10 rounded-xl text-[13px] font-semibold transition-all ${
+            currentTab === "docs"
+              ? "bg-ink-950 text-white"
+              : "text-ink-800/60 hover:text-ink-900 hover:bg-black/[0.04]"
+          }`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M6 6h10M6 10h10M6 14h6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span>Dokumentasi API</span>
         </button>
       </nav>
 

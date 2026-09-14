@@ -1,14 +1,18 @@
 interface HeaderProps {
-  currentTab: "inquiry" | "history";
+  currentTab: "inquiry" | "history" | "docs";
 }
 
 export function Header({ currentTab }: HeaderProps) {
-  const title =
-    currentTab === "inquiry" ? "Bayar Tagihan" : "Riwayat Transaksi";
-  const subtitle =
-    currentTab === "inquiry"
-      ? "Inquiry & pembayaran tagihan PDAM"
-      : "Daftar pembayaran & unduh struk transaksi";
+  let title = "Bayar Tagihan";
+  let subtitle = "Inquiry & pembayaran tagihan PDAM";
+
+  if (currentTab === "history") {
+    title = "Riwayat Transaksi";
+    subtitle = "Daftar pembayaran & unduh struk transaksi";
+  } else if (currentTab === "docs") {
+    title = "Dokumentasi API";
+    subtitle = "Spesifikasi interaktif & live tester endpoint gateway";
+  }
 
   return (
     <header className="print:hidden h-16 sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] flex items-center justify-between px-6">
