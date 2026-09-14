@@ -14,7 +14,40 @@ Aplikasi Full-Stack Web Gateway Pembayaran Tagihan Air PDAM (PDAM Sidoarjo & PDA
 
 ## Arsitektur
 
-Alur request satu arah, dependensi mengarah ke dalam (domain tidak tahu HTTP maupun DB):
+### Diagram Sistem (Scope Tes Full Stack)
+
+```mermaid
+flowchart LR
+    Actor(["👤 Actor"])
+
+    subgraph SCOPE["SCOPE TES FULL STACK"]
+        direction LR
+        FEI["FRONT END\nINQUIRY"]
+        FEP["FRONT END\nPAYMENT"]
+        FEH["FRONT END\nHISTORY /\nLAPORAN TRANSAKSI"]
+        API["API INTERNAL"]
+        DB[("DB\nINTERNAL")]
+    end
+
+    RAJ_INQ["API INQUIRY\nRAJABILLER"]
+    RAJ_PAY["API PAYMENT\nRAJABILLER"]
+
+    Actor --> FEI
+    Actor --> FEP
+    Actor --> FEH
+
+    FEI <-->|inquiry| API
+    FEP <-->|payment| API
+    API --> FEH
+
+    API <--> DB
+
+    API <-->|fastpay.inq| RAJ_INQ
+    API <-->|fastpay.pay| RAJ_PAY
+```
+
+### Alur Internal Request
+
 
 ```
 HTTP request
@@ -180,27 +213,29 @@ npm run db:migrate
 
 ### 5. Menjalankan Aplikasi
 
-- **Mode Development (Hot-Reloading):**
+#### Mode Development (Hot-Reloading)
 
-  ```bash
-  npm run dev
-  ```
+```bash
+npm run dev
+```
 
-- **Mode Produksi (Build + Start):**
+#### Mode Produksi (Build + Start)
 
-  ```bash
-  npm run build
-  npm start
-  ```
+```bash
+npm run build
+npm start
+```
 
-  *Keterangan Build Pipeline (`scripts/build.mjs`):*
-  - Membersihkan direktori `dist/` & `public/`.
-  - Otomatis mengeliminasi komentar kode (`decomment`).
-  - Mem-bundle client **Preact TSX** ke `views/js/app.js` & minify CSS.
-  - Mem-bundle server TypeScript ESM ke `dist/server.js`.
-  - Pre-kompresi multi-tier: **Zstandard (.zst)**, **Brotli (.br)**, dan **Gzip (.gz)** — disajikan oleh `middleware/static.middleware.ts` sesuai `Accept-Encoding`.
+**Keterangan Build Pipeline** (`scripts/build.mjs`):
 
-- Akses aplikasi di browser: **http://localhost:3000**
+- Membersihkan direktori `dist/` & `public/`.
+- Otomatis mengeliminasi komentar kode (`decomment`).
+- Mem-bundle client **Preact TSX** ke `views/js/app.js` & minify CSS.
+- Mem-bundle server TypeScript ESM ke `dist/server.js`.
+- Pre-kompresi multi-tier: **Zstandard (.zst)**, **Brotli (.br)**, dan **Gzip (.gz)** — disajikan oleh `middleware/static.middleware.ts` sesuai `Accept-Encoding`.
+
+Akses aplikasi di browser: **http://localhost:3000**
+
 
 ## Pengujian & Kualitas Kode
 

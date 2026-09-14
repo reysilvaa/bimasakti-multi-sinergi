@@ -26,8 +26,24 @@ export function ReadmeViewer({
         }
       })
       .catch(() => {
-        // Fallback to DEFAULT_README
+        // Fallback: empty
       });
+  }, []);
+
+  // Load Mermaid.js once from CDN
+  useEffect(() => {
+    if (document.getElementById("mermaid-cdn")) return;
+    const s = document.createElement("script");
+    s.id = "mermaid-cdn";
+    s.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
+    s.onload = () => {
+      (window as unknown as { mermaid?: { initialize: (cfg: object) => void } }).mermaid?.initialize({
+        startOnLoad: false,
+        theme: "neutral",
+        flowchart: { curve: "basis" },
+      });
+    };
+    document.head.appendChild(s);
   }, []);
 
   const handleCopy = () => {
@@ -85,12 +101,16 @@ export function ReadmeViewer({
     }
 
     // Escape raw HTML tags except allowed img
-    md = md.replace(/<(?!\/?(img|br|span|div)\b)[^>]+>/gi, "");
+    md = md.replace(/<(?!\/?(img|br|span|div|svg|path|circle|rect|text|g|marker|defs|polygon|polyline|line|ellipse)\b)[^>]+>/gi, "");
 
-    // Code blocks (fenced)
+    // Code blocks (fenced) — Mermaid gets its own div, others get dark code panel
     const codeBlocks: string[] = [];
     md = md.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (_match, lang, code) => {
       const idx = codeBlocks.length;
+      if (lang === "mermaid") {
+        codeBlocks.push(`<div class="mermaid my-6 flex justify-center bg-white border border-black/[0.07] rounded-xl p-6 overflow-x-auto">${code.trim()}</div>`);
+        return `%%CODEBLOCK_${idx}%%`;
+      }
       const cleanCode = code
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -119,19 +139,19 @@ export function ReadmeViewer({
 
     // Headers with IDs for TOC
     md = md.replace(/^#\s+(.+)$/gm, (_match, text) => {
-      return `<h1 class="text-2xl lg:text-3xl font-bold text-ink-950 tracking-tight pb-3 mb-6 border-b border-black/[0.08] flex items-center gap-3"><span>${text}</span></h1>`;
+      return `<h1 class="text-2xl lg:text-3xl font-bold text-ink-950 tracking-tight pb-3 mb-6 border-b border-black/[0.08]">${text}</h1>`;
     });
 
     md = md.replace(/^##\s+(.+)$/gm, (_match, text) => {
       const cleanText = text.replace(/[*`_]/g, "").trim();
       const id = cleanText.toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "");
-      return `<h2 id="${id}" class="text-xl font-bold text-ink-900 tracking-tight pt-8 pb-2 mb-4 border-b border-black/[0.06] flex items-center gap-2 group"><a href="#${id}" class="text-accent-500 opacity-0 group-hover:opacity-100 transition-opacity">#</a><span>${text}</span></h2>`;
+      return `<h2 id="${id}" class="text-xl font-bold text-ink-900 tracking-tight pt-8 pb-2 mb-4 border-b border-black/[0.06]">${text}</h2>`;
     });
 
     md = md.replace(/^###\s+(.+)$/gm, (_match, text) => {
       const cleanText = text.replace(/[*`_]/g, "").trim();
       const id = cleanText.toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "");
-      return `<h3 id="${id}" class="text-base font-bold text-ink-900 pt-5 pb-1 mb-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-accent-500 inline-block"></span><span>${text}</span></h3>`;
+      return `<h3 id="${id}" class="text-base font-bold text-ink-900 pt-5 pb-1 mb-2">${text}</h3>`;
     });
 
     // Horizontal rules
@@ -182,11 +202,13 @@ export function ReadmeViewer({
       return `<blockquote class="my-4 pl-4 border-l-4 border-accent-500/40 italic text-ink-800/70 text-xs leading-relaxed">${text}</blockquote>`;
     });
 
-    // Unordered lists
-    md = md.replace(/^\s*[-*]\s+(.+)$/gm, `<li class="ml-4 list-disc text-xs text-ink-800 leading-relaxed my-1">$1</li>`);
+    // Unordered lists — wrap consecutive <li> groups in <ul>
+    md = md.replace(/^\s*[-*]\s+(.+)$/gm, `<li class="ml-5 list-disc marker:text-ink-400 text-[13px] text-ink-800 leading-relaxed my-1">$1</li>`);
+    md = md.replace(/((?:<li class="ml-5 list-disc[^"]*">[\s\S]*?<\/li>\n?)+)/g, `<ul class="my-3 space-y-1 pl-1">$1</ul>`);
 
-    // Ordered lists
-    md = md.replace(/^\s*(\d+)\.\s+(.+)$/gm, `<li class="ml-4 list-decimal text-xs text-ink-800 leading-relaxed my-1">$2</li>`);
+    // Ordered lists — wrap in <ol>
+    md = md.replace(/^\s*(\d+)\.\s+(.+)$/gm, `<li class="ml-5 list-decimal marker:text-ink-400 text-[13px] text-ink-800 leading-relaxed my-1">$2</li>`);
+    md = md.replace(/((?:<li class="ml-5 list-decimal[^"]*">[\s\S]*?<\/li>\n?)+)/g, `<ol class="my-3 space-y-1 pl-1">$1</ol>`);
 
     // Bold & Italics
     md = md.replace(/\*\*([^*]+)\*\*/g, `<strong class="font-bold text-ink-950">$1</strong>`);
@@ -237,13 +259,23 @@ export function ReadmeViewer({
     };
   }, []);
 
+  // Run Mermaid after HTML is injected into DOM
+  useEffect(() => {
+    const w = window as unknown as { mermaid?: { run: (opts: object) => void } };
+    if (!w.mermaid) return;
+    const nodes = document.querySelectorAll(".readme-prose .mermaid");
+    if (nodes.length === 0) return;
+    // Reset already-processed diagrams so mermaid re-renders them
+    nodes.forEach((n) => n.removeAttribute("data-processed"));
+    w.mermaid.run({ nodes: Array.from(nodes) });
+  }, [renderedHtml]);
+
   return (
     <div className="space-y-6">
       {/* Top Banner Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-black/[0.06] shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
             <h2 className="text-base font-bold text-ink-950">
               Dokumentasi Resmi Proyek (README.md)
             </h2>
