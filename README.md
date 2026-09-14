@@ -31,24 +31,27 @@
 
 ### Alur Internal Request
 
-```
-HTTP Request
-   │
-routes/api.routes.ts          ← deklarasi route
-   ▼
-controllers/*.controller.ts   ← parse + validasi body (zod) → panggil service
-   ▼
-services/*.service.ts         ← use case: orkestrasi, aturan bisnis, gateway
-   ▼
-repository/                   ← satu-satunya layer yang menyentuh MySQL (Drizzle)
-   ▼
-MySQL (bimasakti_pdam)
+```mermaid
+flowchart LR
+    subgraph MAIN ["Pipeline Request (Happy Path)"]
+        direction TB
+        REQ(["🌐 HTTP Request"])
+        ROUTE["routes/api.routes.ts<br/><i>Deklarasi Route</i>"]
+        CTRL["controllers/*.controller.ts<br/><i>Parse & Validasi Zod Body</i>"]
+        SVC["services/*.service.ts<br/><i>Orkestrasi, Aturan Bisnis & Gateway</i>"]
+        REPO["repository/*.repository.ts<br/><i>Satu-satunya Layer Akses DB (Drizzle)</i>"]
+        DB[("MySQL 8 Database<br/><code>bimasakti_pdam</code>")]
 
-Error path (satu pintu):
-  service throw ApiError(rc, msg, payload?)
-     ▼
-  middleware/error.middleware.ts → rc dipetakan ke HTTP status
-     (01/02/03→400, 04→404, 33→409, 99→500) + envelope spec
+        REQ --> ROUTE --> CTRL --> SVC --> REPO --> DB
+    end
+
+    subgraph ERROR_GATE ["Error Handler (Satu Pintu)"]
+        direction TB
+        ERR["middleware/error.middleware.ts<br/><b>Global Error Funnel</b><br/><br/><code>01 / 02 / 03</code> ➔ HTTP 400 (Bad Request)<br/><code>04</code> ➔ HTTP 404 (Not Found)<br/><code>33</code> ➔ HTTP 409 (Conflict / Idempoten)<br/><code>99</code> ➔ HTTP 500 (Internal Error)<br/><br/><i>Membungkus respon ke envelope spesifikasi</i>"]
+    end
+
+    CTRL -.->|Validation Error| ERR
+    SVC -.->|throw ApiError| ERR
 ```
 
 ### Prinsip Desain
